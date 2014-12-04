@@ -44,7 +44,6 @@ The following configuration is required to configure this step :
 
 ## Example
 
-
 The following example deploy an `hello` application on the deployment group `development` after pushed the application on the `apps.mycompany.com` S3 bucket :
 
 ```
