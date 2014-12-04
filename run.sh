@@ -1,57 +1,22 @@
 #!/bin/bash
 set +x
 
-# Check if functions exists
-#
-# Set Colors
-#
-
-bold=$(tput bold)
-underline=$(tput sgr 0 1)
-reset=$(tput sgr0)
-
-red=$(tput setaf 1)
-green=$(tput setaf 76)
-white=$(tput setaf 7)
-tan=$(tput setaf 202)
-blue=$(tput setaf 25)
-
-#
-# Headers and  Logging
-#
-
-header() { printf "\n${bold}${blue}===  %s  ===${reset}\n" "$@"
-}
-info() { printf "➜ $@\n"
-}
-success() { printf "${green}✔ %s${reset}\n" "$@"
-}
-error() { printf "${red}✖ %s${reset}\n" "$@"
-}
-warn() { printf "${tan}➜ %s${reset}\n" "$@"
-}
-underline() { printf "${underline}${bold}%s${reset}\n" "$@"
-}
-bold() { printf "${bold}%s${reset}\n" "$@"
-}
-note() { printf "\n${underline}${bold}${blue}Note:${reset}  ${blue}%s${reset}\n" "$@"
+type_exists() {
+  if [ $(type -P $1) ]; then
+    return 0
+  fi
+  return 1
 }
 
-
-if [ -z "$WERCKER_AWS_CODE_DEPLOY_ACCESS_KEY_ID" ]; then
-  error 'Please specify access key id'
+# Check AWS is installed
+if ! type_exists 'aws'; then
+  error 'AWS Cli is not installed on this box.'
+  info 'Please install AWS Cli : https://github.com/EdgecaseInc/wercker-step-install-aws-cli'
   exit 1
 fi
 
-if [ -z "$WERCKER_AWS_CODE_DEPLOY_SECRET_ACCESS_KEY" ]; then
-  error 'Please specify secret access key'
-  exit 1
-fi
 
-if [ -z "$WERCKER_AWS_CODE_DEPLOY_DEFAULT_REGION" ]; then
-	warn "No region specified (using default : us-east-1). Please set the 'default-region' variable"
-fi
-
+# Check variables
 if [ -z "$WERCKER_AWS_CODE_DEPLOY_APPLICATION_NAME" ]; then
   error "Please set the 'application-name' variable"
   exit 1
@@ -77,12 +42,6 @@ if [ -z "$WERCKER_AWS_CODE_DEPLOY_SERVICE_ROLE_ARN" ]; then
   exit 1
 fi
 
-
-# This variables must be exported
-export AWS_ACCESS_KEY_ID="$WERCKER_AWS_CODE_DEPLOY_ACCESS_KEY_ID"
-export AWS_SECRET_ACCESS_KEY="$WERCKER_AWS_CODE_DEPLOY_SECRET_ACCESS_KEY"
-export AWS_DEFAULT_REGION=${WERCKER_AWS_OPSWORKS_DEPLOY_DEFAULT_REGION:-us-east-1}
-
 # ----- Application -----
 # see documentation :
 #    http://docs.aws.amazon.com/cli/latest/reference/deploy/get-application.html
@@ -91,7 +50,7 @@ export AWS_DEFAULT_REGION=${WERCKER_AWS_OPSWORKS_DEPLOY_DEFAULT_REGION:-us-east-
 # Application variables
 APPLICATION_NAME="$WERCKER_AWS_CODE_DEPLOY_APPLICATION_NAME"
 # Check application exists
-header "Checking application '$APPLICATION_NAME' exists"
+info "=== Checking application '$APPLICATION_NAME' exists ==="
 
 APPLICATION_EXISTS="aws deploy get-application --application-name $APPLICATION_NAME"
 info "$APPLICATION_EXISTS"
@@ -99,7 +58,7 @@ APPLICATION_EXISTS_OUTPUT=$($APPLICATION_EXISTS 2>&1)
 
 if [[ $? -ne 0 ]];then
   warn "$APPLICATION_EXISTS_OUTPUT"
-  header "Creating application '$APPLICATION_NAME'"
+  info "=== Creating application '$APPLICATION_NAME' ==="
 
   # Create application
   APPLICATION_CREATE="aws deploy create-application --application-name $APPLICATION_NAME"
@@ -126,7 +85,7 @@ EC2_TAGS_FILTERS="$WERCKER_AWS_CODE_DEPLOY_EC2_TAGS_FILTERS"
 SERVICE_ROLE_ARN="$WERCKER_AWS_CODE_DEPLOY_SERVICE_ROLE_ARN"
 
 # Ckeck deployment group exists
-header "Checking deployment group '$DEPLOYMENT_GROUP' exists for application '$APPLICATION_NAME'"
+info "=== Checking deployment group '$DEPLOYMENT_GROUP' exists for application '$APPLICATION_NAME' ==="
 
 DEPLOYMENT_GROUP_EXISTS="aws deploy get-deployment-group --application-name $APPLICATION_NAME --deployment-group-name $DEPLOYMENT_GROUP"
 info "$DEPLOYMENT_GROUP_EXISTS"
@@ -134,7 +93,7 @@ DEPLOYMENT_GROUP_EXISTS_OUTPUT=$($DEPLOYMENT_GROUP_EXISTS 2>&1)
 
 if [[ $? -ne 0 ]];then
   warn "$DEPLOYMENT_GROUP_EXISTS_OUTPUT"
-  header "Creating deployment group '$DEPLOYMENT_GROUP' for application '$APPLICATION_NAME'"
+  info "=== Creating deployment group '$DEPLOYMENT_GROUP' for application '$APPLICATION_NAME' ==="
 
   # Create deployment group
   DEPLOYMENT_GROUP_CREATE="aws deploy create-deployment-group --application-name $APPLICATION_NAME --deployment-group-name $DEPLOYMENT_GROUP --deployment-config-name $DEPLOYMENT_CONFIG_NAME"
@@ -172,7 +131,7 @@ S3_REGION="$WERCKER_AWS_CODE_DEPLOY_S3_REGION"
 S3_BUCKET="$WERCKER_AWS_CODE_DEPLOY_S3_BUCKET"
 APPLICATION_REVISION="$WERCKER_AWS_CODE_DEPLOY_APPLICATION_REVISION"
 
-header "Pushing revision '$APPLICATION_REVISION' to S3"
+info "=== Pushing revision '$APPLICATION_REVISION' to S3 ==="
 PUSH_S3="aws deploy push --application-name $APPLICATION_NAME --region $S3_REGION --s3-location s3://$S3_BUCKET/$APPLICATION_NAME-$APPLICATION_REVISION.zip --source ."
 
 info "$PUSH_S3"
@@ -188,7 +147,7 @@ success "Pushing revision '$APPLICATION_REVISION' to S3 succeed"
 # ----- Register revision -----
 # see documentation : http://docs.aws.amazon.com/cli/latest/reference/deploy/register-application-revision.html
 # ----------------------
-header "Registering revision '$APPLICATION_REVISION'"
+info "=== Registering revision '$APPLICATION_REVISION' ==="
 S3_LOCATION="--s3-location bucket=$S3_BUCKET,key=$APPLICATION_NAME-$APPLICATION_REVISION.zip,bundleType=zip"
 REGISTER_REVISION="aws deploy register-application-revision --application-name $APPLICATION_NAME $S3_LOCATION"
 
@@ -205,7 +164,7 @@ success "Registering revision '$APPLICATION_REVISION' succeed"
 # ----- Deployment -----
 # see documentation : http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment.html
 # ----------------------
-header "Creating deployment for application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP'"
+info  "=== Creating deployment for application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' ==="
 DEPLOYMENT="aws deploy create-deployment --application-name $APPLICATION_NAME --deployment-config-name $DEPLOYMENT_CONFIG_NAME --deployment-group-name $DEPLOYMENT_GROUP $S3_LOCATION"
 
 info "$DEPLOYMENT"

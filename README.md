@@ -6,11 +6,13 @@ This wercker step permits to deploy applications with [AWS Code Deploy](http://d
 
 Please read the [AWS Code Deploy](http://docs.aws.amazon.com/codedeploy/latest/userguide/welcome.html) documentation and [API](http://docs.aws.amazon.com/cli/latest/reference/deploy/index.html) before using this step.
 
+Note: Before using this step you have to install [AWS Cli](https://github.com/EdgecaseInc/wercker-step-install-aws-cli).
 
 ## Versions
 
 | Release date | Step version | 
 | -------------| -------------| 
+| 2014-12-04   | 0.0.4        | 
 | 2014-12-04   | 0.0.3        | 
 | 2014-12-04   | 0.0.2        | 
 | 2014-12-03   | 0.0.1        | 
@@ -19,12 +21,6 @@ Please read the [AWS Code Deploy](http://docs.aws.amazon.com/codedeploy/latest/u
 ## Configuration
 
 The following configuration is required to configure this step :
-
-#### AWS Authentication
-
-* `access-key-id` (required) AWS Access Key ID
-* `secret-access-key` (required) AWS Secret Access Key
-* `default-region` (optional) [Deployment config name](http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment-config.html) By default : CodeDeployDefault.OneAtATime
 
 #### AWS Code Deploy - Application 
 
@@ -51,7 +47,12 @@ The following example deploy an `hello` application on the deployment group `dev
 ```
 deploy:
   steps:
-  ...
+  # Install aws cli
+  - edgecaseadmin/install-aws-cli:
+     key: AKRAIRVTDYKVCGUDJ3FJ3
+     secret: 7ERFCYIVkZGPH9ujUJsmSsB9qxXWLYPmcsa4Os1Z5
+     region: us-east-1 
+  # AWS Code Deploy
   - nhuray/aws-code-deploy:
      access-key-id: AKRAIRVTDYKVCGUDJ3FJ3
      secret-access-key: 7ERFCYIVkZGPH9ujUJsmSsB9qxXWLYPmcsa4Os1Z5
