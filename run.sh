@@ -1,12 +1,9 @@
 #!/bin/bash
 set +x
 
-# determine home
-HOME=`dirname "$0"`
-
 # Check if functions exists
-if [ -f $HOME/.functions ]; then
-  . $HOME/.functions
+if [ -f .functions ]; then
+  source .functions
 else
   echo "[ERROR] Unable to load functions."
   exit 1

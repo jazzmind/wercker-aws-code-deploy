@@ -11,6 +11,7 @@ Please read the [AWS Code Deploy](http://docs.aws.amazon.com/codedeploy/latest/u
 
 | Release date | Step version | 
 | -------------| -------------| 
+| 2014-12-04   | 0.0.2        | 
 | 2014-12-03   | 0.0.1        | 
 
 
