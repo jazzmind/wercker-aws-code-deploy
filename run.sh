@@ -98,14 +98,14 @@ if [[ $? -ne 0 ]];then
   # Create deployment group
   DEPLOYMENT_GROUP_CREATE="aws deploy create-deployment-group --application-name $APPLICATION_NAME --deployment-group-name $DEPLOYMENT_GROUP --deployment-config-name $DEPLOYMENT_CONFIG_NAME"
 
+  if [ -n "$SERVICE_ROLE_ARN" ]; then
+    DEPLOYMENT_GROUP_CREATE="$DEPLOYMENT_GROUP_CREATE --service-role-arn $SERVICE_ROLE_ARN"
+  fi
   if [ -n "$AUTO_SCALING_GROUPS" ]; then
-    DEPLOYMENT_GROUP_CREATE="$DEPLOYMENT_GROUP_CREATE --auto-scaling-groups $AS_GROUP"
+    DEPLOYMENT_GROUP_CREATE="$DEPLOYMENT_GROUP_CREATE --auto-scaling-groups $AUTO_SCALING_GROUPS"
   fi
   if [ -n "$EC2_TAGS_FILTERS" ]; then
     DEPLOYMENT_GROUP_CREATE="$DEPLOYMENT_GROUP_CREATE --ec2-tag-filters $EC2_TAGS_FILTERS"
-  fi
-  if [ -n "$SERVICE_ROLE_ARN" ]; then
-    DEPLOYMENT_GROUP_CREATE="$DEPLOYMENT_GROUP_CREATE --service-role-arn $SERVICE_ROLE_ARN"
   fi
   info "$DEPLOYMENT_GROUP_CREATE"
   DEPLOYMENT_GROUP_CREATE_OUTPUT=$($DEPLOYMENT_GROUP_CREATE 2>&1)
@@ -178,6 +178,6 @@ fi
 
 DEPLOYMENT_ID=$(echo $DEPLOYMENT_OUTPUT | sed -n 's/.*"deploymentId": "\(.*\)".*/\1/p')
 success "Deployment for application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' succeed"
-note "You can see your deployment at : https://console.aws.amazon.com/codedeploy/home#/deployments/$DEPLOYMENT_ID"
+echo "You can see your deployment at : https://console.aws.amazon.com/codedeploy/home#/deployments/$DEPLOYMENT_ID"
 
 set -e

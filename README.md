@@ -51,12 +51,11 @@ deploy:
      region: us-east-1 
   # AWS Code Deploy
   - nhuray/aws-code-deploy:
-     access-key-id: AKRAIRVTDYKVCGUDJ3FJ3
-     secret-access-key: 7ERFCYIVkZGPH9ujUJsmSsB9qxXWLYPmcsa4Os1Z5
      application-name: hello
      application-revision: 1.1.0
      deployment-group-name: development
      s3-bucket: apps.mycompany.com
      s3-region: us-east-1
      service-role-arn: arn:aws:iam::89862646$091:role/CodeDeploy
+     ec2-tag-filters: Key=app,Value=hello,Type=KEY_AND_VALUE Key=environment,Value=development,Type=KEY_AND_VALUE
 ```
