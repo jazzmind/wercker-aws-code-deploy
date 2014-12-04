@@ -14,22 +14,22 @@ Please read the [AWS Code Deploy](http://docs.aws.amazon.com/codedeploy/latest/u
 | 2014-12-03   | 0.0.1        | 
 
 
-## Options
+## Configuration
 
 The following configuration is required to configure this step :
 
-### AWS Authentication
+#### AWS Authentication
 
 * `access-key-id` (required) AWS Access Key ID
 * `secret-access-key` (required) AWS Secret Access Key
 * `default-region` (optional) [Deployment config name](http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment-config.html) By default : CodeDeployDefault.OneAtATime
 
-### AWS Code Deploy - Application 
+#### AWS Code Deploy - Application 
 
 * `application-name` (required) Name of the application to deploy
 * `application-revision` (required) Revision of the application to deploy
 
-### AWS Code Deploy - Deployment Group
+#### AWS Code Deploy - Deployment Group
 
 * `deployment-group-name` (required) Name of the deployment group
 * `service-role-arn` (required) Service role arn giving permissions to use [Code Deploy](http://docs.aws.amazon.com/codedeploy/latest/userguide/how-to-create-deployment-group.html)
@@ -37,7 +37,7 @@ The following configuration is required to configure this step :
 * `auto-scaling-groups` (optional) A list of Auto Scaling groups when [creating a deployment group](http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment-group.html) 
 * `deployment-config-name` (optional) [Deployment config name](http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment-config.html) By default : CodeDeployDefault.OneAtATime
 
-### AWS Code Deploy - S3 Configuration
+#### AWS Code Deploy - S3 Configuration
 
 * `s3-bucket` (required) S3 Bucket where applications are pushed 
 * `s3-region` (required) S3 Bucket region
