@@ -12,10 +12,7 @@ Note: Before using this step you have to install [AWS Cli](https://github.com/Ed
 
 | Release date | Step version | 
 | -------------| -------------| 
-| 2014-12-04   | 0.0.4        | 
-| 2014-12-04   | 0.0.3        | 
-| 2014-12-04   | 0.0.2        | 
-| 2014-12-03   | 0.0.1        | 
+| 2014-12-04   | 0.0.5        | 
 
 
 ## Configuration

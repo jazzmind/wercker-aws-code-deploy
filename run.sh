@@ -1,5 +1,5 @@
 #!/bin/bash
-set +x
+set +e
 
 type_exists() {
   if [ $(type -P $1) ]; then
@@ -179,3 +179,5 @@ fi
 DEPLOYMENT_ID=$(echo $DEPLOYMENT_OUTPUT | sed -n 's/.*"deploymentId": "\(.*\)".*/\1/p')
 success "Deployment for application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' succeed"
 note "You can see your deployment at : https://console.aws.amazon.com/codedeploy/home#/deployments/$DEPLOYMENT_ID"
+
+set -e
