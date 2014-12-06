@@ -24,13 +24,17 @@ The following configuration is required to configure this step :
 * `application-name` (required) Name of the application to deploy
 * `application-revision` (required) Revision of the application to deploy
 
+#### AWS Code Deploy - Deployment Config
+
+* `deployment-config-name` (optional) [Deployment config name](http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment-config.html). By default : CodeDeployDefault.OneAtATime
+* `minimum-healthy-hosts` (optional) The minimum number of healthy instances during deployment. By default : type=FLEET_PERCENT,value=75
+
 #### AWS Code Deploy - Deployment Group
 
-* `deployment-group-name` (required) Name of the deployment group
-* `service-role-arn` (required) Service role arn giving permissions to use [Code Deploy](http://docs.aws.amazon.com/codedeploy/latest/userguide/how-to-create-deployment-group.html)
-* `ec2-tag-filters` (optional) A list of Amazon EC2 tags to filter on when [creating a deployment group](http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment-group.html)
-* `auto-scaling-groups` (optional) A list of Auto Scaling groups when [creating a deployment group](http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment-group.html) 
-* `deployment-config-name` (optional) [Deployment config name](http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment-config.html) By default : CodeDeployDefault.OneAtATime
+* `deployment-group-name` (required) [Deployment group name](http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment-group.html)
+* `service-role-arn` (required for creation) Service role arn giving permissions to use [Code Deploy](http://docs.aws.amazon.com/codedeploy/latest/userguide/how-to-create-deployment-group.html)
+* `ec2-tag-filters` (required for creation) EC2 tags to filter on when [creating a deployment group](http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment-group.html)
+* `auto-scaling-groups` (optional) Auto Scaling groups when [creating a deployment group](http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment-group.html) 
 
 #### AWS Code Deploy - S3 Configuration
 

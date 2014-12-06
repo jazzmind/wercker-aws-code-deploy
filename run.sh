@@ -74,12 +74,44 @@ if [[ $? -ne 0 ]];then
 else
   success "Application '$APPLICATION_NAME' already exists"
 fi
+
+# ----- Deployment config (optional) -----
+# see documentation : http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment-config.html
+# ----------------------
+DEPLOYMENT_CONFIG_NAME=${WERCKER_AWS_CODE_DEPLOY_DEPLOYMENT_CONFIG_NAME:-CodeDeployDefault.OneAtATime}
+MINIMUM_HEALTHY_HOSTS=${WERCKER_AWS_CODE_DEPLOY_MINIMUM_HEALTHY_HOSTS:-type=FLEET_PERCENT,value=75}
+
+# Ckeck deployment config exists
+info "=== Checking deployment config '$DEPLOYMENT_CONFIG_NAME' exists ==="
+
+DEPLOYMENT_CONFIG_EXISTS="aws deploy get-deployment-config --deployment-config-name $DEPLOYMENT_CONFIG_NAME"
+info "$DEPLOYMENT_CONFIG_EXISTS"
+DEPLOYMENT_CONFIG_EXISTS_OUTPUT=$($DEPLOYMENT_CONFIG_EXISTS 2>&1)
+
+if [[ $? -ne 0 ]];then
+  warn "$DEPLOYMENT_CONFIG_EXISTS_OUTPUT"
+  info "=== Creating deployment config '$DEPLOYMENT_CONFIG_NAME' ==="
+
+ # Create deployment config
+  DEPLOYMENT_CONFIG_CREATE="aws deploy create-deployment-config --deployment-config-name $DEPLOYMENT_CONFIG_NAME --minimum-healthy-hosts $MINIMUM_HEALTHY_HOSTS"
+  info "$DEPLOYMENT_CONFIG_CREATE"
+  DEPLOYMENT_CONFIG_CREATE_OUTPUT=$($DEPLOYMENT_CONFIG_CREATE 2>&1)
+
+  if [[ $? -ne 0 ]];then
+    warn "$DEPLOYMENT_CONFIG_CREATE_OUTPUT"
+    error "Creating deployment config '$DEPLOYMENT_CONFIG_NAME' failed"
+    exit 1
+  fi
+  success "Creating deployment config '$DEPLOYMENT_CONFIG_NAME' succeed"
+else
+  success "Deployment config '$DEPLOYMENT_CONFIG_NAME' already exists"
+fi
+
 # ----- Deployment group -----
 # see documentation : http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment-config.html
 # ----------------------
 # Deployment group variables
 DEPLOYMENT_GROUP=${WERCKER_AWS_CODE_DEPLOY_DEPLOYMENT_GROUP_NAME:-$WERCKER_DEPLOYTARGET_NAME}
-DEPLOYMENT_CONFIG_NAME=${WERCKER_AWS_CODE_DEPLOY_DEPLOYMENT_CONFIG_NAME:-CodeDeployDefault.OneAtATime}
 AUTO_SCALING_GROUPS="$WERCKER_AWS_CODE_DEPLOY_AUTO_SCALING_GROUPS"
 EC2_TAG_FILTERS="$WERCKER_AWS_CODE_DEPLOY_EC2_TAG_FILTERS"
 SERVICE_ROLE_ARN="$WERCKER_AWS_CODE_DEPLOY_SERVICE_ROLE_ARN"
@@ -120,9 +152,6 @@ else
   success "Deployment group '$DEPLOYMENT_GROUP' already exists for application '$APPLICATION_NAME'"
 fi
 
-# ----- Deployment config (optional) -----
-# see documentation : http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment-config.html
-# ----------------------
 
 # ----- Push a revision to S3 -----
 # see documentation : http://docs.aws.amazon.com/cli/latest/reference/deploy/push.html
