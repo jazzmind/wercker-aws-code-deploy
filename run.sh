@@ -22,13 +22,13 @@ if [ -z "$WERCKER_AWS_CODE_DEPLOY_APPLICATION_NAME" ]; then
   exit 1
 fi
 
-if [ -z "$WERCKER_AWS_CODE_DEPLOY_DEPLOYMENT_GROUP_NAME" ]; then
-  error "Please set the 'deployment-group' variable"
+if [ -z "$WERCKER_AWS_CODE_DEPLOY_APPLICATION_VERSION" ]; then
+  error "Please set the 'application-version' variable"
   exit 1
 fi
 
-if [ -z "$WERCKER_AWS_CODE_DEPLOY_S3_REGION" ]; then
-  error "Please set the 's3-region' variable"
+if [ -z "$WERCKER_AWS_CODE_DEPLOY_DEPLOYMENT_GROUP_NAME" ]; then
+  error "Please set the 'deployment-group' variable"
   exit 1
 fi
 
@@ -49,6 +49,8 @@ fi
 # ----------------------
 # Application variables
 APPLICATION_NAME="$WERCKER_AWS_CODE_DEPLOY_APPLICATION_NAME"
+APPLICATION_VERSION="$WERCKER_AWS_CODE_DEPLOY_APPLICATION_VERSION"
+
 # Check application exists
 info "=== Checking application '$APPLICATION_NAME' exists ==="
 
@@ -156,45 +158,70 @@ fi
 # ----- Push a revision to S3 -----
 # see documentation : http://docs.aws.amazon.com/cli/latest/reference/deploy/push.html
 # ----------------------
-S3_REGION="$WERCKER_AWS_CODE_DEPLOY_S3_REGION"
 S3_BUCKET="$WERCKER_AWS_CODE_DEPLOY_S3_BUCKET"
-APPLICATION_REVISION="$WERCKER_AWS_CODE_DEPLOY_APPLICATION_REVISION"
+S3_SOURCE=${WERCKER_AWS_CODE_DEPLOY_S3_SOURCE:-.}
+S3_KEY="$WERCKER_AWS_CODE_DEPLOY_S3_KEY"
 
-info "=== Pushing revision '$APPLICATION_REVISION' to S3 ==="
-PUSH_S3="aws deploy push --application-name $APPLICATION_NAME --region $S3_REGION --s3-location s3://$S3_BUCKET/$APPLICATION_NAME-$APPLICATION_REVISION.zip --source ."
+# Build S3 Location
+S3_LOCATION="s3://$S3_BUCKET"
+if [ -n "$S3_KEY" ]; then
+  S3_LOCATION="$S3_LOCATION/$S3_KEY"
+fi
+S3_LOCATION="$S3_LOCATION/$REVISION"
+
+info "=== Pushing revision '$REVISION' to S3 ==="
+PUSH_S3="aws deploy push --application-name $APPLICATION_NAME --s3-location $S3_LOCATION --source $S3_SOURCE"
 
 info "$PUSH_S3"
 PUSH_S3_OUTPUT=$($PUSH_S3 2>&1)
 
 if [[ $? -ne 0 ]];then
   warn "$PUSH_S3_OUTPUT"
-  error "Pushing revision '$APPLICATION_REVISION' to S3 failed"
+  error "Pushing revision '$REVISION' to S3 failed"
   exit 1
 fi
-success "Pushing revision '$APPLICATION_REVISION' to S3 succeed"
+success "Pushing revision '$REVISION' to S3 succeed"
 
 # ----- Register revision -----
 # see documentation : http://docs.aws.amazon.com/cli/latest/reference/deploy/register-application-revision.html
 # ----------------------
-info "=== Registering revision '$APPLICATION_REVISION' ==="
-S3_LOCATION="--s3-location bucket=$S3_BUCKET,key=$APPLICATION_NAME-$APPLICATION_REVISION.zip,bundleType=zip"
-REGISTER_REVISION="aws deploy register-application-revision --application-name $APPLICATION_NAME $S3_LOCATION"
+info "=== Registering revision '$REVISION' ==="
+REVISION=${WERCKER_AWS_CODE_DEPLOY_REVISION:-$APPLICATION_NAME-$APPLICATION_VERSION.zip}
+REVISION_DESCRIPTION="$WERCKER_AWS_CODE_DEPLOY_REVISION_DESCRIPTION"
+
+# Build S3 Location
+BUNDLE_TYPE=${REVISION##*.}
+S3_LOCATION="bucket=$S3_BUCKET,version=$APPLICATION_VERSION,bundleType=$BUNDLE_TYPE"
+
+if [ -n "$S3_KEY" ]; then
+  S3_LOCATION="$S3_LOCATION,key=$S3_KEY/$REVISION"
+else
+  S3_LOCATION="$S3_LOCATION,key=$REVISION"
+fi
+S3_LOCATION="$S3_LOCATION,eTag=`date +%s%N`"
+
+
+# Define egister-application-revision command
+REGISTER_REVISION="aws deploy register-application-revision --application-name $APPLICATION_NAME --s3-location $S3_LOCATION"
+if [ -n "$REVISION_DESCRIPTION" ]; then
+  REGISTER_REVISION="$REGISTER_REVISION --description $REVISION_DESCRIPTION"
+fi
 
 info "$REGISTER_REVISION"
 REGISTER_REVISION_OUTPUT=$($REGISTER_REVISION 2>&1)
 
 if [[ $? -ne 0 ]];then
   warn "$REGISTER_REVISION_OUTPUT"
-  error "Registering revision '$APPLICATION_REVISION' failed"
+  error "Registering revision '$REVISION' failed"
   exit 1
 fi
-success "Registering revision '$APPLICATION_REVISION' succeed"
+success "Registering revision '$REVISION' succeed"
 
 # ----- Deployment -----
 # see documentation : http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment.html
 # ----------------------
 info  "=== Creating deployment for application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' ==="
-DEPLOYMENT="aws deploy create-deployment --application-name $APPLICATION_NAME --deployment-config-name $DEPLOYMENT_CONFIG_NAME --deployment-group-name $DEPLOYMENT_GROUP $S3_LOCATION"
+DEPLOYMENT="aws deploy create-deployment --application-name $APPLICATION_NAME --deployment-config-name $DEPLOYMENT_CONFIG_NAME --deployment-group-name $DEPLOYMENT_GROUP --s3-location $S3_LOCATION"
 
 info "$DEPLOYMENT"
 DEPLOYMENT_OUTPUT=$($DEPLOYMENT 2>&1)
