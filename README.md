@@ -49,7 +49,7 @@ The following configuration allows to configure this step :
 
 * `s3-bucket` (required) S3 Bucket
 * `s3-source` (optional) S3 Source. By default : _._
-* `s3-key` (optional) S3 Key
+* `s3-key` (optional) S3 Key. By default: _{application-name}_
 
 #### [Revision step](http://docs.aws.amazon.com/cli/latest/reference/deploy/register-application-revision.html) 
 
