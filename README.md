@@ -1,7 +1,7 @@
 Wercker step to deploy with AWS Code Deploy
 =======================
 
-This wercker step allow to deploy applications with [AWS Code Deploy](http://docs.aws.amazon.com/codedeploy/latest/userguide/welcome.html) service.
+This wercker step allows to deploy applications with [AWS Code Deploy](http://docs.aws.amazon.com/codedeploy/latest/userguide/welcome.html) service.
 
 Please read the [AWS Code Deploy](http://docs.aws.amazon.com/codedeploy/latest/userguide/welcome.html) documentation and [API](http://docs.aws.amazon.com/cli/latest/reference/deploy/index.html) before using this step.
 
@@ -16,7 +16,7 @@ To deploy an application with AWS Code Deploy, a workflow decomposed in steps mu
 
 This first step consists on defining the application. If the application does not exists this step create the application in Code Deploy.
  
-The following configuration is required to configure this step :
+The following configuration allows to configure this step :
 
 * `application-name` (required) Name of the application to deploy
 * `application-version` (optional) Version of the application to deploy. By default: Short commit id _(eg. fec8f4a)_
@@ -25,7 +25,7 @@ The following configuration is required to configure this step :
 
 The second step consists on creating a deployment config. This step is totally *optional* because you can use the deployment strategy already defines in Code Deploy.
 
-The following configuration is required to configure this step :
+The following configuration allows to configure this step :
 
 * `deployment-config-name` (optional) Deployment config name. By default : _CodeDeployDefault.OneAtATime_
 * `minimum-healthy-hosts` (optional) The minimum number of healthy instances during deployment. By default : _type=FLEET_PERCENT,value=75_
@@ -34,7 +34,7 @@ The following configuration is required to configure this step :
 
 The third step consists on defining a deployment group. If the deployment group provided does not exists this step create a deployment group in Code Deploy.
 
-The following configuration is required to configure this step :
+The following configuration allows to configure this step :
 
 * `deployment-group-name` (required) Deployment group name
 * `service-role-arn` (optional) Service role arn giving permissions to use Code Deploy when creating a deployment group
@@ -45,7 +45,7 @@ The following configuration is required to configure this step :
 
 This step consists to push the application to S3.
 
-The following configuration is required to configure this step :
+The following configuration allows to configure this step :
 
 * `s3-bucket` (required) S3 Bucket
 * `s3-source` (optional) S3 Source. By default : _._
@@ -55,7 +55,7 @@ The following configuration is required to configure this step :
 
 This step consists to create the revision in Code Deploy.
 
-The following configuration is required to configure this step :
+The following configuration allows to configure this step :
 
 * `revision` (optional) Revision of the application to deploy. By default: _{application-name}-{application-version}.zip_
 * `revision-description` (optional) Description of the revision of the application to deploy
@@ -64,7 +64,7 @@ The following configuration is required to configure this step :
 
 This final step consists to create the deployment in Code Deploy.
 
-The following configuration is required to configure this step :
+The following configuration allows to configure this step :
 
 * `deployment-description` (optional) Description of the deployment
 * `deployment-show` (optional) Show the deployment on the deployment group. By default : _true_
