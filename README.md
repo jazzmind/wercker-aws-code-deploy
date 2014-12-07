@@ -67,7 +67,7 @@ This final step consists to create the deployment in Code Deploy.
 The following configuration allows to configure this step :
 
 * `deployment-description` (optional) Description of the deployment
-* `deployment-show` (optional) Show the deployment on the deployment group. By default : _true_
+* `deployment-overview` (optional) Visualize the deployment. By default : _true_
 
 ## Example
 

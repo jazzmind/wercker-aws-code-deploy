@@ -270,7 +270,7 @@ success "Registering revision '$REVISION' succeeded"
 # see documentation : http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment.html
 # ----------------------
 DEPLOYMENT_DESCRIPTION="$WERCKER_AWS_CODE_DEPLOY_DEPLOYMENT_DESCRIPTION"
-DEPLOYMENT_SHOW=${WERCKER_AWS_CODE_DEPLOY_DEPLOYMENT_SHOW:-true}
+DEPLOYMENT_OVERVIEW=${WERCKER_AWS_CODE_DEPLOY_DEPLOYMENT_OVERVIEW:-true}
 
 h1 "Step 6 : Creating deployment"
 DEPLOYMENT="aws deploy create-deployment --application-name $APPLICATION_NAME --deployment-config-name $DEPLOYMENT_CONFIG_NAME --deployment-group-name $DEPLOYMENT_GROUP --s3-location $S3_LOCATION"
@@ -290,10 +290,13 @@ fi
 DEPLOYMENT_ID=$(echo $DEPLOYMENT_OUTPUT | jsonValue 'deploymentId' | tr -d ' ')
 note "You can follow your deployment at : https://console.aws.amazon.com/codedeploy/home#/deployments/$DEPLOYMENT_ID"
 
-if [ 'true' = "$DEPLOYMENT_SHOW" ]; then
-  h1  "Deploying application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP'"
+if [ 'true' = "$DEPLOYMENT_OVERVIEW" ]; then
+  h1  "Deploymnent Overview"
   DEPLOYMENT_GET="aws deploy get-deployment --deployment-id $DEPLOYMENT_ID"
-  echo "$DEPLOYMENT_GET"
+  debug "$DEPLOYMENT_GET"
+  
+  h2  "Deploying application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP'"
+
   while :
     do
       sleep 5
