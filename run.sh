@@ -248,8 +248,6 @@ if [ -n "$S3_KEY" ]; then
 else
   S3_LOCATION="$S3_LOCATION,key=$REVISION"
 fi
-S3_LOCATION="$S3_LOCATION,eTag=`date +%s%N`"
-
 
 # Define egister-application-revision command
 REGISTER_REVISION="aws deploy register-application-revision --application-name $APPLICATION_NAME --s3-location $S3_LOCATION"
