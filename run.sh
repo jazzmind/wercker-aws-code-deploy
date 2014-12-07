@@ -8,6 +8,12 @@ type_exists() {
   return 1
 }
 
+function jsonValue() {
+  KEY=$1
+  num=$2
+  awk -F"[,:}]" '{for(i=1;i<=NF;i++){if($i~/'$KEY'\042/){print $(i+1)}}}' | tr -d '"' | tr -d ' ' | sed -n ${num}p
+}
+
 # Check AWS is installed
 if ! type_exists 'aws'; then
   error 'AWS Cli is not installed on this box.'
@@ -216,6 +222,7 @@ success "Registering revision '$REVISION' succeed"
 # see documentation : http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment.html
 # ----------------------
 DEPLOYMENT_DESCRIPTION="$WERCKER_AWS_CODE_DEPLOY_DEPLOYMENT_DESCRIPTION"
+DEPLOYMENT_SHOW=${WERCKER_AWS_CODE_DEPLOY_DEPLOYMENT_SHOW:-true}
 
 info  "=== Creating deployment for application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' ==="
 DEPLOYMENT="aws deploy create-deployment --application-name $APPLICATION_NAME --deployment-config-name $DEPLOYMENT_CONFIG_NAME --deployment-group-name $DEPLOYMENT_GROUP --s3-location $S3_LOCATION"
@@ -228,12 +235,39 @@ DEPLOYMENT_OUTPUT=$($DEPLOYMENT 2>&1)
 
 if [[ $? -ne 0 ]];then
   warn "$DEPLOYMENT_OUTPUT"
-  error "Deployment for application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' failed"
+  error "Deployment of application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' failed"
   exit 1
 fi
 
-DEPLOYMENT_ID=$(echo $DEPLOYMENT_OUTPUT | sed -n 's/.*"deploymentId": "\(.*\)".*/\1/p')
-success "Deployment for application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' succeed"
-echo "You can see your deployment at : https://console.aws.amazon.com/codedeploy/home#/deployments/$DEPLOYMENT_ID"
+DEPLOYMENT_ID=$(echo $DEPLOYMENT_OUTPUT | jsonValue 'deploymentId')
+echo "You can follow your deployment at : https://console.aws.amazon.com/codedeploy/home#/deployments/$DEPLOYMENT_ID"
+
+
+if [ 'true' -eq "$DEPLOYMENT_SHOW" ]; then
+  info  "=== Deploying application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' ==="
+  DEPLOYMENT_GET="aws deploy get-deployment --deployment-id $DEPLOYMENT_ID"
+  info "$DEPLOYMENT_GET"
+  while :
+    do
+      DEPLOYMENT_GET_OUTPUT=$($DEPLOYMENT_GET 2>&1 > /tmp/$DEPLOYMENT_ID)
+      FAILED=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'Failed')
+      IN_PROGRESS=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'InProgress')
+      SKIPPED=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'Skipped')
+      SUCCEEDED=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'Succeeded')
+      info  "| In Progress: $IN_PROGRESS | Suceeded : $SUCCEEDED | Failed : $FAILED | Skipped : $SKIPPED |"
+      # Deployment failed
+      if [ $FAILED -gt 0 ]; then
+          error "Deployment of application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' failed"
+          exit 1
+      fi
+      # Zero deployment in progress
+      if [ $IN_PROGRESS -gt 0 ]; then
+         success "Deployment of application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' succeed"
+      fi
+      sleep 2
+    done
+else
+  success "Deployment of application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' in progress"
+fi
 
 set -e
