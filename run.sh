@@ -8,10 +8,10 @@ type_exists() {
   return 1
 }
 
-function jsonValue() {
-  KEY=$1
+jsonValue() {
+  key=$1
   num=$2
-  awk -F"[,:}]" '{for(i=1;i<=NF;i++){if($i~/'$KEY'\042/){print $(i+1)}}}' | tr -d '"' | tr -d ' ' | sed -n ${num}p
+  awk -F"[,:}]" '{for(i=1;i<=NF;i++){if($i~/'$key'\042/){print $(i+1)}}}' | tr -d '"' | tr -d ' ' | sed -n ${num}p
 }
 
 # Check AWS is installed
@@ -51,7 +51,7 @@ APPLICATION_VERSION=${WERCKER_AWS_CODE_DEPLOY_APPLICATION_VERSION:-${WERCKER_GIT
 # Check application exists
 info "=== Checking application '$APPLICATION_NAME' exists ==="
 
-APPLICATION_EXISTS="aws deploy get-application --application-name $APPLICATION_NAME"
+APPLICATION_EXISTS="aws deploy get-application --application-name '$APPLICATION_NAME'"
 info "$APPLICATION_EXISTS"
 APPLICATION_EXISTS_OUTPUT=$($APPLICATION_EXISTS 2>&1)
 
@@ -60,7 +60,7 @@ if [[ $? -ne 0 ]];then
   info "=== Creating application '$APPLICATION_NAME' ==="
 
   # Create application
-  APPLICATION_CREATE="aws deploy create-application --application-name $APPLICATION_NAME"
+  APPLICATION_CREATE="aws deploy create-application --application-name '$APPLICATION_NAME'"
   info "$APPLICATION_CREATE"
   APPLICATION_CREATE_OUTPUT=$($APPLICATION_CREATE 2>&1)
 
@@ -83,7 +83,7 @@ MINIMUM_HEALTHY_HOSTS=${WERCKER_AWS_CODE_DEPLOY_MINIMUM_HEALTHY_HOSTS:-type=FLEE
 # Ckeck deployment config exists
 info "=== Checking deployment config '$DEPLOYMENT_CONFIG_NAME' exists ==="
 
-DEPLOYMENT_CONFIG_EXISTS="aws deploy get-deployment-config --deployment-config-name $DEPLOYMENT_CONFIG_NAME"
+DEPLOYMENT_CONFIG_EXISTS="aws deploy get-deployment-config --deployment-config-name '$DEPLOYMENT_CONFIG_NAME'"
 info "$DEPLOYMENT_CONFIG_EXISTS"
 DEPLOYMENT_CONFIG_EXISTS_OUTPUT=$($DEPLOYMENT_CONFIG_EXISTS 2>&1)
 
@@ -92,7 +92,7 @@ if [[ $? -ne 0 ]];then
   info "=== Creating deployment config '$DEPLOYMENT_CONFIG_NAME' ==="
 
  # Create deployment config
-  DEPLOYMENT_CONFIG_CREATE="aws deploy create-deployment-config --deployment-config-name $DEPLOYMENT_CONFIG_NAME --minimum-healthy-hosts $MINIMUM_HEALTHY_HOSTS"
+  DEPLOYMENT_CONFIG_CREATE="aws deploy create-deployment-config --deployment-config-name '$DEPLOYMENT_CONFIG_NAME' --minimum-healthy-hosts '$MINIMUM_HEALTHY_HOSTS'"
   info "$DEPLOYMENT_CONFIG_CREATE"
   DEPLOYMENT_CONFIG_CREATE_OUTPUT=$($DEPLOYMENT_CONFIG_CREATE 2>&1)
 
@@ -118,7 +118,7 @@ SERVICE_ROLE_ARN="$WERCKER_AWS_CODE_DEPLOY_SERVICE_ROLE_ARN"
 # Ckeck deployment group exists
 info "=== Checking deployment group '$DEPLOYMENT_GROUP' exists for application '$APPLICATION_NAME' ==="
 
-DEPLOYMENT_GROUP_EXISTS="aws deploy get-deployment-group --application-name $APPLICATION_NAME --deployment-group-name $DEPLOYMENT_GROUP"
+DEPLOYMENT_GROUP_EXISTS="aws deploy get-deployment-group --application-name '$APPLICATION_NAME' --deployment-group-name '$DEPLOYMENT_GROUP'"
 info "$DEPLOYMENT_GROUP_EXISTS"
 DEPLOYMENT_GROUP_EXISTS_OUTPUT=$($DEPLOYMENT_GROUP_EXISTS 2>&1)
 
@@ -127,16 +127,16 @@ if [[ $? -ne 0 ]];then
   info "=== Creating deployment group '$DEPLOYMENT_GROUP' for application '$APPLICATION_NAME' ==="
 
   # Create deployment group
-  DEPLOYMENT_GROUP_CREATE="aws deploy create-deployment-group --application-name $APPLICATION_NAME --deployment-group-name $DEPLOYMENT_GROUP --deployment-config-name $DEPLOYMENT_CONFIG_NAME"
+  DEPLOYMENT_GROUP_CREATE="aws deploy create-deployment-group --application-name '$APPLICATION_NAME' --deployment-group-name '$DEPLOYMENT_GROUP' --deployment-config-name '$DEPLOYMENT_CONFIG_NAME'"
 
   if [ -n "$SERVICE_ROLE_ARN" ]; then
-    DEPLOYMENT_GROUP_CREATE="$DEPLOYMENT_GROUP_CREATE --service-role-arn $SERVICE_ROLE_ARN"
+    DEPLOYMENT_GROUP_CREATE="$DEPLOYMENT_GROUP_CREATE --service-role-arn '$SERVICE_ROLE_ARN'"
   fi
   if [ -n "$AUTO_SCALING_GROUPS" ]; then
-    DEPLOYMENT_GROUP_CREATE="$DEPLOYMENT_GROUP_CREATE --auto-scaling-groups $AUTO_SCALING_GROUPS"
+    DEPLOYMENT_GROUP_CREATE="$DEPLOYMENT_GROUP_CREATE --auto-scaling-groups '$AUTO_SCALING_GROUPS'"
   fi
   if [ -n "$EC2_TAG_FILTERS" ]; then
-    DEPLOYMENT_GROUP_CREATE="$DEPLOYMENT_GROUP_CREATE --ec2-tag-filters $EC2_TAG_FILTERS"
+    DEPLOYMENT_GROUP_CREATE="$DEPLOYMENT_GROUP_CREATE --ec2-tag-filters '$EC2_TAG_FILTERS'"
   fi
   info "$DEPLOYMENT_GROUP_CREATE"
   DEPLOYMENT_GROUP_CREATE_OUTPUT=$($DEPLOYMENT_GROUP_CREATE 2>&1)
@@ -170,7 +170,7 @@ fi
 S3_LOCATION="$S3_LOCATION/$REVISION"
 
 info "=== Pushing revision '$REVISION' to S3 ==="
-PUSH_S3="aws deploy push --application-name $APPLICATION_NAME --s3-location $S3_LOCATION --source $S3_SOURCE"
+PUSH_S3="aws deploy push --application-name '$APPLICATION_NAME' --s3-location '$S3_LOCATION' --source '$S3_SOURCE'"
 if [ -n "$REVISION_DESCRIPTION" ]; then
   PUSH_S3="$PUSH_S3 --description '$REVISION_DESCRIPTION'"
 fi
@@ -203,7 +203,7 @@ S3_LOCATION="$S3_LOCATION,eTag=`date +%s%N`"
 
 
 # Define egister-application-revision command
-REGISTER_REVISION="aws deploy register-application-revision --application-name $APPLICATION_NAME --s3-location $S3_LOCATION"
+REGISTER_REVISION="aws deploy register-application-revision --application-name '$APPLICATION_NAME' --s3-location '$S3_LOCATION'"
 if [ -n "$REVISION_DESCRIPTION" ]; then
   REGISTER_REVISION="$REGISTER_REVISION --description '$REVISION_DESCRIPTION'"
 fi
@@ -225,7 +225,7 @@ DEPLOYMENT_DESCRIPTION="$WERCKER_AWS_CODE_DEPLOY_DEPLOYMENT_DESCRIPTION"
 DEPLOYMENT_SHOW=${WERCKER_AWS_CODE_DEPLOY_DEPLOYMENT_SHOW:-true}
 
 info  "=== Creating deployment for application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' ==="
-DEPLOYMENT="aws deploy create-deployment --application-name $APPLICATION_NAME --deployment-config-name $DEPLOYMENT_CONFIG_NAME --deployment-group-name $DEPLOYMENT_GROUP --s3-location $S3_LOCATION"
+DEPLOYMENT="aws deploy create-deployment --application-name '$APPLICATION_NAME' --deployment-config-name '$DEPLOYMENT_CONFIG_NAME' --deployment-group-name '$DEPLOYMENT_GROUP' --s3-location '$S3_LOCATION'"
 
 if [ -n "$DEPLOYMENT_DESCRIPTION" ]; then
   DEPLOYMENT="$DEPLOYMENT --description '$DEPLOYMENT_DESCRIPTION'"
