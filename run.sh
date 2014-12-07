@@ -22,11 +22,6 @@ if [ -z "$WERCKER_AWS_CODE_DEPLOY_APPLICATION_NAME" ]; then
   exit 1
 fi
 
-if [ -z "$WERCKER_AWS_CODE_DEPLOY_APPLICATION_VERSION" ]; then
-  error "Please set the 'application-version' variable"
-  exit 1
-fi
-
 if [ -z "$WERCKER_AWS_CODE_DEPLOY_DEPLOYMENT_GROUP_NAME" ]; then
   error "Please set the 'deployment-group' variable"
   exit 1
@@ -37,10 +32,6 @@ if [ -z "$WERCKER_AWS_CODE_DEPLOY_S3_BUCKET" ]; then
   exit 1
 fi
 
-if [ -z "$WERCKER_AWS_CODE_DEPLOY_SERVICE_ROLE_ARN" ]; then
-  error "Please set the 'service-role-arn' variable"
-  exit 1
-fi
 
 # ----- Application -----
 # see documentation :
@@ -49,7 +40,7 @@ fi
 # ----------------------
 # Application variables
 APPLICATION_NAME="$WERCKER_AWS_CODE_DEPLOY_APPLICATION_NAME"
-APPLICATION_VERSION="$WERCKER_AWS_CODE_DEPLOY_APPLICATION_VERSION"
+APPLICATION_VERSION=${WERCKER_AWS_CODE_DEPLOY_APPLICATION_VERSION:-${WERCKER_GIT_COMMIT:0:7}}
 
 # Check application exists
 info "=== Checking application '$APPLICATION_NAME' exists ==="
@@ -158,6 +149,9 @@ fi
 # ----- Push a revision to S3 -----
 # see documentation : http://docs.aws.amazon.com/cli/latest/reference/deploy/push.html
 # ----------------------
+REVISION=${WERCKER_AWS_CODE_DEPLOY_REVISION:-$APPLICATION_NAME-$APPLICATION_VERSION.zip}
+REVISION_DESCRIPTION="$WERCKER_AWS_CODE_DEPLOY_REVISION_DESCRIPTION"
+
 S3_BUCKET="$WERCKER_AWS_CODE_DEPLOY_S3_BUCKET"
 S3_SOURCE=${WERCKER_AWS_CODE_DEPLOY_S3_SOURCE:-.}
 S3_KEY="$WERCKER_AWS_CODE_DEPLOY_S3_KEY"
@@ -171,6 +165,9 @@ S3_LOCATION="$S3_LOCATION/$REVISION"
 
 info "=== Pushing revision '$REVISION' to S3 ==="
 PUSH_S3="aws deploy push --application-name $APPLICATION_NAME --s3-location $S3_LOCATION --source $S3_SOURCE"
+if [ -n "$REVISION_DESCRIPTION" ]; then
+  PUSH_S3="$PUSH_S3 --description '$REVISION_DESCRIPTION'"
+fi
 
 info "$PUSH_S3"
 PUSH_S3_OUTPUT=$($PUSH_S3 2>&1)
@@ -186,8 +183,6 @@ success "Pushing revision '$REVISION' to S3 succeed"
 # see documentation : http://docs.aws.amazon.com/cli/latest/reference/deploy/register-application-revision.html
 # ----------------------
 info "=== Registering revision '$REVISION' ==="
-REVISION=${WERCKER_AWS_CODE_DEPLOY_REVISION:-$APPLICATION_NAME-$APPLICATION_VERSION.zip}
-REVISION_DESCRIPTION="$WERCKER_AWS_CODE_DEPLOY_REVISION_DESCRIPTION"
 
 # Build S3 Location
 BUNDLE_TYPE=${REVISION##*.}
@@ -204,7 +199,7 @@ S3_LOCATION="$S3_LOCATION,eTag=`date +%s%N`"
 # Define egister-application-revision command
 REGISTER_REVISION="aws deploy register-application-revision --application-name $APPLICATION_NAME --s3-location $S3_LOCATION"
 if [ -n "$REVISION_DESCRIPTION" ]; then
-  REGISTER_REVISION="$REGISTER_REVISION --description $REVISION_DESCRIPTION"
+  REGISTER_REVISION="$REGISTER_REVISION --description '$REVISION_DESCRIPTION'"
 fi
 
 info "$REGISTER_REVISION"

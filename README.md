@@ -22,7 +22,7 @@ The following configuration is required to configure this step :
 #### AWS Code Deploy - [Application](http://docs.aws.amazon.com/cli/latest/reference/deploy/create-application.html) 
 
 * `application-name` (required) Name of the application to deploy
-* `application-version` (required) Version of the application to deploy
+* `application-version` (optional) Version of the application to deploy. By default: Short commit id (eg. fec8f4a)
 
 #### AWS Code Deploy - [Deployment Config](http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment-config.html)
 
@@ -39,7 +39,6 @@ The following configuration is required to configure this step :
 #### AWS Code Deploy - [S3 Push](http://docs.aws.amazon.com/cli/latest/reference/deploy/push.html)
 
 * `s3-bucket` (required) S3 Bucket
-* `s3-region` (required) S3 Bucket region
 * `s3-source` (optional) S3 Source. By default : _._
 * `s3-key` (optional) S3 Key
 
@@ -66,7 +65,6 @@ deploy:
      application-version: 1.1.0
      deployment-group-name: development
      s3-bucket: apps.mycompany.com
-     s3-region: us-east-1
      service-role-arn: arn:aws:iam::89862646$091:role/CodeDeploy
      ec2-tag-filters: Key=app,Value=hello,Type=KEY_AND_VALUE Key=environment,Value=development,Type=KEY_AND_VALUE
 ```
