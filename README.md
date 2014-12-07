@@ -1,4 +1,4 @@
-Wercker step to deploy with AWS Code Deploy
+Wercker step for AWS Code Deploy
 =======================
 
 This wercker step allows to deploy applications with [AWS Code Deploy](http://docs.aws.amazon.com/codedeploy/latest/userguide/welcome.html) service.
@@ -10,7 +10,7 @@ or install AWS Cli with this Wercker step : [EdgecaseInc/wercker-step-install-aw
 
 ## AWS Code Deploy workflow
 
-To deploy an application with AWS Code Deploy, a workflow decomposed in steps must be followed : 
+To deploy an application with AWS Code Deploy, the step follow this workflow : 
 
 #### [Application step](http://docs.aws.amazon.com/cli/latest/reference/deploy/create-application.html) 
 
@@ -23,7 +23,7 @@ The following configuration allows to configure this step :
 
 #### [Deployment Config step](http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment-config.html)
 
-The second step consists on creating a deployment config. This step is totally *optional* because you can use the deployment strategy already defines in Code Deploy.
+The second step consists on creating a deployment config. This step is totally *optional* because you can use the deployment strategy already defined in Code Deploy.
 
 The following configuration allows to configure this step :
 
