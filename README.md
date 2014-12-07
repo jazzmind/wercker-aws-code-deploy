@@ -10,7 +10,7 @@ or install AWS Cli with this Wercker step : [EdgecaseInc/wercker-step-install-aw
 
 ## AWS Code Deploy workflow
 
-To deploy an application with AWS Code Deploy, the step follow this workflow : 
+To deploy an application with AWS Code Deploy, the Wercker step follow this steps : 
 
 #### Step 1 : Defining [Application](http://docs.aws.amazon.com/cli/latest/reference/deploy/create-application.html) 
 
@@ -21,7 +21,7 @@ The following configuration allows to configure this step :
 * `application-name` (required) Name of the application to deploy
 * `application-version` (optional) Version of the application to deploy. By default: Short commit id _(eg. fec8f4a)_
 
-#### Step 2 : Defining [Deployment Config](http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment-config.html)(optional)
+#### Step 2 : Defining [Deployment Config](http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment-config.html) (optional)
 
 The second step consists on creating a deployment config. This step is totally *optional* because you can use the deployment strategy already defined in Code Deploy.
 
