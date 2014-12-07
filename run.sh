@@ -215,9 +215,14 @@ success "Registering revision '$REVISION' succeed"
 # ----- Deployment -----
 # see documentation : http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment.html
 # ----------------------
+DEPLOYMENT_DESCRIPTION="$WERCKER_AWS_CODE_DEPLOY_DEPLOYMENT_DESCRIPTION"
+
 info  "=== Creating deployment for application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' ==="
 DEPLOYMENT="aws deploy create-deployment --application-name $APPLICATION_NAME --deployment-config-name $DEPLOYMENT_CONFIG_NAME --deployment-group-name $DEPLOYMENT_GROUP --s3-location $S3_LOCATION"
 
+if [ -n "$DEPLOYMENT_DESCRIPTION" ]; then
+  DEPLOYMENT="$DEPLOYMENT --description '$DEPLOYMENT_DESCRIPTION'"
+fi
 info "$DEPLOYMENT"
 DEPLOYMENT_OUTPUT=$($DEPLOYMENT 2>&1)
 
