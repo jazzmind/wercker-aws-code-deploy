@@ -115,7 +115,7 @@ if [[ $? -ne 0 ]];then
   fi
   success "Creating application '$APPLICATION_NAME' succeeded"
 else
-  info "Application '$APPLICATION_NAME' already exists"
+  success "Application '$APPLICATION_NAME' already exists"
 fi
 
 
@@ -149,7 +149,7 @@ if [[ $? -ne 0 ]];then
   fi
   success "Creating deployment config '$DEPLOYMENT_CONFIG_NAME' succeeded"
 else
-  info "Deployment config '$DEPLOYMENT_CONFIG_NAME' already exists"
+  success "Deployment config '$DEPLOYMENT_CONFIG_NAME' already exists"
 fi
 
 
@@ -196,7 +196,7 @@ if [[ $? -ne 0 ]];then
   fi
   success "Creating deployment group '$DEPLOYMENT_GROUP' for application '$APPLICATION_NAME' succeeded"
 else
-  info "Deployment group '$DEPLOYMENT_GROUP' already exists for application '$APPLICATION_NAME'"
+  success "Deployment group '$DEPLOYMENT_GROUP' already exists for application '$APPLICATION_NAME'"
 fi
 
 
@@ -294,7 +294,7 @@ if [ 'true' = "$DEPLOYMENT_OVERVIEW" ]; then
   h1  "Deploymnent Overview"
   DEPLOYMENT_GET="aws deploy get-deployment --deployment-id $DEPLOYMENT_ID"
   info "$DEPLOYMENT_GET"
-  
+
   h2  "Deploying application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP'"
 
   while :
