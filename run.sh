@@ -291,7 +291,7 @@ DEPLOYMENT_ID=$(echo $DEPLOYMENT_OUTPUT | jsonValue 'deploymentId' | tr -d ' ')
 note "You can follow your deployment at : https://console.aws.amazon.com/codedeploy/home#/deployments/$DEPLOYMENT_ID"
 
 if [ 'true' = "$DEPLOYMENT_OVERVIEW" ]; then
-  h1  "Deploymnent Overview"
+  h1  "Deployment Overview"
   DEPLOYMENT_GET="aws deploy get-deployment --deployment-id $DEPLOYMENT_ID"
   info "$DEPLOYMENT_GET"
 
