@@ -27,9 +27,9 @@ h1() { printf "\n${underline}${bold}${blue}%s${reset}\n" "$@"
 }
 h2() { printf "\n${underline}${bold}${white}%s${reset}\n" "$@"
 }
-debug() { printf "$@\n"
+debug() { printf "${white}%s${reset}\n" "$@"
 }
-info() { printf "➜ $@\n"
+info() { printf "${white}➜ %s${reset}\n" "$@"
 }
 success() { printf "${green}✔ %s${reset}\n" "$@"
 }
@@ -95,7 +95,7 @@ h1 "Step 1 : Defining application"
 h2 "Checking application '$APPLICATION_NAME' exists"
 
 APPLICATION_EXISTS="aws deploy get-application --application-name $APPLICATION_NAME"
-debug "$APPLICATION_EXISTS"
+info "$APPLICATION_EXISTS"
 APPLICATION_EXISTS_OUTPUT=$($APPLICATION_EXISTS 2>&1)
 
 if [[ $? -ne 0 ]];then
@@ -130,7 +130,7 @@ h1 "Step 2 :  Defining deployment config"
 h2 "Checking deployment config '$DEPLOYMENT_CONFIG_NAME' exists"
 
 DEPLOYMENT_CONFIG_EXISTS="aws deploy get-deployment-config --deployment-config-name $DEPLOYMENT_CONFIG_NAME"
-debug "$DEPLOYMENT_CONFIG_EXISTS"
+info "$DEPLOYMENT_CONFIG_EXISTS"
 DEPLOYMENT_CONFIG_EXISTS_OUTPUT=$($DEPLOYMENT_CONFIG_EXISTS 2>&1)
 
 if [[ $? -ne 0 ]];then
@@ -167,7 +167,7 @@ h1 "Step 3 : Defining deployment group"
 h2 "Checking deployment group '$DEPLOYMENT_GROUP' exists for application '$APPLICATION_NAME'"
 
 DEPLOYMENT_GROUP_EXISTS="aws deploy get-deployment-group --application-name $APPLICATION_NAME --deployment-group-name $DEPLOYMENT_GROUP"
-debug "$DEPLOYMENT_GROUP_EXISTS"
+info "$DEPLOYMENT_GROUP_EXISTS"
 DEPLOYMENT_GROUP_EXISTS_OUTPUT=$($DEPLOYMENT_GROUP_EXISTS 2>&1)
 
 if [[ $? -ne 0 ]];then
@@ -186,7 +186,7 @@ if [[ $? -ne 0 ]];then
   if [ -n "$EC2_TAG_FILTERS" ]; then
     DEPLOYMENT_GROUP_CREATE="$DEPLOYMENT_GROUP_CREATE --ec2-tag-filters $EC2_TAG_FILTERS"
   fi
-  debug "$DEPLOYMENT_GROUP_CREATE"
+  info "$DEPLOYMENT_GROUP_CREATE"
   DEPLOYMENT_GROUP_CREATE_OUTPUT=$($DEPLOYMENT_GROUP_CREATE 2>&1)
 
   if [[ $? -ne 0 ]];then
@@ -223,7 +223,7 @@ if [ -n "$REVISION_DESCRIPTION" ]; then
   PUSH_S3="$PUSH_S3 --description '$REVISION_DESCRIPTION'"
 fi
 
-debug "$PUSH_S3"
+info "$PUSH_S3"
 PUSH_S3_OUTPUT=$($PUSH_S3 2>&1)
 
 if [[ $? -ne 0 ]];then
@@ -255,7 +255,7 @@ if [ -n "$REVISION_DESCRIPTION" ]; then
   REGISTER_REVISION="$REGISTER_REVISION --description '$REVISION_DESCRIPTION'"
 fi
 
-debug "$REGISTER_REVISION"
+info "$REGISTER_REVISION"
 REGISTER_REVISION_OUTPUT=$($REGISTER_REVISION 2>&1)
 
 if [[ $? -ne 0 ]];then
@@ -278,7 +278,7 @@ DEPLOYMENT="aws deploy create-deployment --application-name $APPLICATION_NAME --
 if [ -n "$DEPLOYMENT_DESCRIPTION" ]; then
   DEPLOYMENT="$DEPLOYMENT --description \"$DEPLOYMENT_DESCRIPTION\""
 fi
-debug "$DEPLOYMENT"
+info "$DEPLOYMENT"
 DEPLOYMENT_OUTPUT=$($DEPLOYMENT 2>&1)
 
 if [[ $? -ne 0 ]];then
@@ -293,7 +293,7 @@ note "You can follow your deployment at : https://console.aws.amazon.com/codedep
 if [ 'true' = "$DEPLOYMENT_OVERVIEW" ]; then
   h1  "Deploymnent Overview"
   DEPLOYMENT_GET="aws deploy get-deployment --deployment-id $DEPLOYMENT_ID"
-  debug "$DEPLOYMENT_GET"
+  info "$DEPLOYMENT_GET"
   
   h2  "Deploying application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP'"
 
@@ -306,7 +306,6 @@ if [ 'true' = "$DEPLOYMENT_OVERVIEW" ]; then
         error "Deployment of application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' failed"
         exit 1
       fi
-
 
       # Deployment Status
       STATUS=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'status' | tr -d '\r\n' | tr -d ' ')
@@ -329,7 +328,7 @@ if [ 'true' = "$DEPLOYMENT_OVERVIEW" ]; then
       # Deployment succeeded
       if [ "$STATUS" = 'Succeeded' ]; then
          success "Deployment of application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' succeeded"
-         exit 0
+         break
       fi
 
     done
