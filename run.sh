@@ -241,7 +241,7 @@ h1 "Step 5 : Registering revision"
 
 # Build S3 Location
 BUNDLE_TYPE=${REVISION##*.}
-S3_LOCATION="bucket=$S3_BUCKET,version=$APPLICATION_VERSION,bundleType=$BUNDLE_TYPE"
+S3_LOCATION="bucket=$S3_BUCKET,bundleType=$BUNDLE_TYPE"
 
 if [ -n "$S3_KEY" ]; then
   S3_LOCATION="$S3_LOCATION,key=$S3_KEY/$REVISION"
