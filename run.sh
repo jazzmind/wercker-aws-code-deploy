@@ -319,11 +319,12 @@ if [ 'true' = "$DEPLOYMENT_OVERVIEW" ]; then
       fi
 
       # Deployment Overview
-      FAILED=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'Failed' | tr -d '\r\n' | tr -d ' ')
       IN_PROGRESS=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'InProgress' | tr -d '\r\n' | tr -d ' ')
+      PENDING=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'Pending' | tr -d '\r\n' | tr -d ' ')
       SKIPPED=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'Skipped' | tr -d '\r\n' | tr -d ' ')
       SUCCEEDED=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'Succeeded' | tr -d '\r\n' | tr -d ' ')
-      echo  "| In Progress: $IN_PROGRESS | Suceeded : $SUCCEEDED | Failed : $FAILED | Skipped : $SKIPPED |"
+      FAILED=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'Failed' | tr -d '\r\n' | tr -d ' ')
+      echo  "| In Progress: $IN_PROGRESS | Pending : $PENDING | Skipped : $SKIPPED | Succeeded : $SUCCEEDED | Failed : $FAILED |"
 
       # Deployment succeeded
       if [ "$STATUS" = 'Succeeded' ]; then
