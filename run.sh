@@ -91,7 +91,7 @@ APPLICATION_NAME="$WERCKER_AWS_CODE_DEPLOY_APPLICATION_NAME"
 APPLICATION_VERSION=${WERCKER_AWS_CODE_DEPLOY_APPLICATION_VERSION:-${WERCKER_GIT_COMMIT:0:7}}
 
 # Check application exists
-h1 "Step 1 : Defining application"
+h1 "Step 1: Defining application"
 h2 "Checking application '$APPLICATION_NAME' exists"
 
 APPLICATION_EXISTS="aws deploy get-application --application-name $APPLICATION_NAME"
@@ -126,7 +126,7 @@ DEPLOYMENT_CONFIG_NAME=${WERCKER_AWS_CODE_DEPLOY_DEPLOYMENT_CONFIG_NAME:-CodeDep
 MINIMUM_HEALTHY_HOSTS=${WERCKER_AWS_CODE_DEPLOY_MINIMUM_HEALTHY_HOSTS:-type=FLEET_PERCENT,value=75}
 
 # Ckeck deployment config exists
-h1 "Step 2 :  Defining deployment config"
+h1 "Step 2: Defining deployment config"
 h2 "Checking deployment config '$DEPLOYMENT_CONFIG_NAME' exists"
 
 DEPLOYMENT_CONFIG_EXISTS="aws deploy get-deployment-config --deployment-config-name $DEPLOYMENT_CONFIG_NAME"
@@ -163,7 +163,7 @@ EC2_TAG_FILTERS="$WERCKER_AWS_CODE_DEPLOY_EC2_TAG_FILTERS"
 SERVICE_ROLE_ARN="$WERCKER_AWS_CODE_DEPLOY_SERVICE_ROLE_ARN"
 
 # Ckeck deployment group exists
-h1 "Step 3 : Defining deployment group"
+h1 "Step 3: Defining deployment group"
 h2 "Checking deployment group '$DEPLOYMENT_GROUP' exists for application '$APPLICATION_NAME'"
 
 DEPLOYMENT_GROUP_EXISTS="aws deploy get-deployment-group --application-name $APPLICATION_NAME --deployment-group-name $DEPLOYMENT_GROUP"
@@ -217,7 +217,7 @@ if [ -n "$S3_KEY" ]; then
 fi
 S3_LOCATION="$S3_LOCATION/$REVISION"
 
-h1 "Step 4 : Pushing to S3"
+h1 "Step 4: Pushing to S3"
 PUSH_S3="aws deploy push --application-name $APPLICATION_NAME --s3-location $S3_LOCATION --source $S3_SOURCE"
 if [ -n "$REVISION_DESCRIPTION" ]; then
   PUSH_S3="$PUSH_S3 --description '$REVISION_DESCRIPTION'"
@@ -237,7 +237,7 @@ success "Pushing revision '$REVISION' to S3 succeeded"
 # ----- Register revision -----
 # see documentation : http://docs.aws.amazon.com/cli/latest/reference/deploy/register-application-revision.html
 # ----------------------
-h1 "Step 5 : Registering revision"
+h1 "Step 5: Registering revision"
 
 # Build S3 Location
 BUNDLE_TYPE=${REVISION##*.}
@@ -272,7 +272,7 @@ success "Registering revision '$REVISION' succeeded"
 DEPLOYMENT_DESCRIPTION="$WERCKER_AWS_CODE_DEPLOY_DEPLOYMENT_DESCRIPTION"
 DEPLOYMENT_OVERVIEW=${WERCKER_AWS_CODE_DEPLOY_DEPLOYMENT_OVERVIEW:-true}
 
-h1 "Step 6 : Creating deployment"
+h1 "Step 6: Creating deployment"
 DEPLOYMENT="aws deploy create-deployment --application-name $APPLICATION_NAME --deployment-config-name $DEPLOYMENT_CONFIG_NAME --deployment-group-name $DEPLOYMENT_GROUP --s3-location $S3_LOCATION"
 
 if [ -n "$DEPLOYMENT_DESCRIPTION" ]; then
