@@ -84,7 +84,7 @@ if [ -z "$WERCKER_AWS_CODE_DEPLOY_S3_BUCKET" ]; then
 fi
 
 # ----- Install AWS Cli -----
-# see documentation : http://docs.aws.amazon.com/cli/latest/userguide/installing.html
+# see documentation http://docs.aws.amazon.com/cli/latest/userguide/installing.html
 # ---------------------------
 
 # Check AWS is installed
@@ -99,7 +99,7 @@ if ! type_exists 'aws'; then
 fi
 
 # ----- Configure -----
-# see documentation :
+# see documentation
 #    http://docs.aws.amazon.com/cli/latest/reference/configure/index.html
 # ----------------------
 set -e
@@ -123,7 +123,7 @@ fi
 set +e
 
 # ----- Application -----
-# see documentation :
+# see documentation
 #    http://docs.aws.amazon.com/cli/latest/reference/deploy/get-application.html
 #    http://docs.aws.amazon.com/cli/latest/reference/deploy/create-application.html
 # ----------------------
@@ -141,7 +141,7 @@ APPLICATION_EXISTS_OUTPUT=$($APPLICATION_EXISTS 2>&1)
 
 if [ $? -ne 0 ]; then
   warn "$APPLICATION_EXISTS_OUTPUT"
-  h2 "Creating application '$APPLICATION_NAME' :"
+  h2 "Creating application '$APPLICATION_NAME'"
 
   # Create application
   APPLICATION_CREATE="aws deploy create-application --application-name $APPLICATION_NAME"
@@ -160,7 +160,7 @@ fi
 
 
 # ----- Deployment config (optional) -----
-# see documentation : http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment-config.html
+# see documentation http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment-config.html
 # ----------------------
 DEPLOYMENT_CONFIG_NAME=${WERCKER_AWS_CODE_DEPLOY_DEPLOYMENT_CONFIG_NAME:-CodeDeployDefault.OneAtATime}
 MINIMUM_HEALTHY_HOSTS=${WERCKER_AWS_CODE_DEPLOY_MINIMUM_HEALTHY_HOSTS:-type=FLEET_PERCENT,value=75}
@@ -194,7 +194,7 @@ fi
 
 
 # ----- Deployment group -----
-# see documentation : http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment-config.html
+# see documentation http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment-config.html
 # ----------------------
 # Deployment group variables
 DEPLOYMENT_GROUP=${WERCKER_AWS_CODE_DEPLOY_DEPLOYMENT_GROUP_NAME:-$WERCKER_DEPLOYTARGET_NAME}
@@ -241,7 +241,7 @@ fi
 
 
 # ----- Push a revision to S3 -----
-# see documentation : http://docs.aws.amazon.com/cli/latest/reference/deploy/push.html
+# see documentation http://docs.aws.amazon.com/cli/latest/reference/deploy/push.html
 # ----------------------
 REVISION=${WERCKER_AWS_CODE_DEPLOY_REVISION:-$APPLICATION_NAME-$APPLICATION_VERSION.zip}
 REVISION_DESCRIPTION="$WERCKER_AWS_CODE_DEPLOY_REVISION_DESCRIPTION"
@@ -275,7 +275,7 @@ success "Pushing revision '$REVISION' to S3 succeeded"
 
 
 # ----- Register revision -----
-# see documentation : http://docs.aws.amazon.com/cli/latest/reference/deploy/register-application-revision.html
+# see documentation http://docs.aws.amazon.com/cli/latest/reference/deploy/register-application-revision.html
 # ----------------------
 h1 "Step 6: Registering revision"
 
@@ -307,7 +307,7 @@ success "Registering revision '$REVISION' succeeded"
 
 
 # ----- Deployment -----
-# see documentation : http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment.html
+# see documentation http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment.html
 # ----------------------
 DEPLOYMENT_DESCRIPTION="$WERCKER_AWS_CODE_DEPLOY_DEPLOYMENT_DESCRIPTION"
 DEPLOYMENT_OVERVIEW=${WERCKER_AWS_CODE_DEPLOY_DEPLOYMENT_OVERVIEW:-true}
@@ -328,7 +328,7 @@ if [ $? -ne 0 ]; then
 fi
 
 DEPLOYMENT_ID=$(echo $DEPLOYMENT_OUTPUT | jsonValue 'deploymentId' | tr -d ' ')
-note "You can follow your deployment at : https://console.aws.amazon.com/codedeploy/home#/deployments/$DEPLOYMENT_ID"
+note "You can follow your deployment at: https://console.aws.amazon.com/codedeploy/home#/deployments/$DEPLOYMENT_ID"
 
 if [ 'true' = "$DEPLOYMENT_OVERVIEW" ]; then
   h1  "Deployment Overview"
@@ -363,7 +363,7 @@ if [ 'true' = "$DEPLOYMENT_OVERVIEW" ]; then
       SKIPPED=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'Skipped' | tr -d '\r\n' | tr -d ' ')
       SUCCEEDED=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'Succeeded' | tr -d '\r\n' | tr -d ' ')
       FAILED=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'Failed' | tr -d '\r\n' | tr -d ' ')
-      echo  "| In Progress: $IN_PROGRESS | Pending : $PENDING | Skipped : $SKIPPED | Succeeded : $SUCCEEDED | Failed : $FAILED |"
+      echo  "| In Progress: $IN_PROGRESS | Pending: $PENDING | Skipped: $SKIPPED | Succeeded: $SUCCEEDED | Failed: $FAILED |"
 
       # Deployment succeeded
       if [ "$STATUS" = 'Succeeded' ]; then
