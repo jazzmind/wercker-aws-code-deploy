@@ -340,7 +340,7 @@ if [ 'true' = "$DEPLOYMENT_OVERVIEW" ]; then
   while :
     do
       sleep 5
-      DEPLOYMENT_GET_OUTPUT=$($DEPLOYMENT_GET 2>&1 > /tmp/$DEPLOYMENT_ID)
+      DEPLOYMENT_GET_OUTPUT=$($DEPLOYMENT_GET 2>&1)
       if [ $? -ne 0 ]; then
         warn "$DEPLOYMENT_OUTPUT"
         error "Deployment of application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' failed"
@@ -348,8 +348,8 @@ if [ 'true' = "$DEPLOYMENT_OVERVIEW" ]; then
       fi
 
       # Deployment Status
-      STATUS=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'status' | tr -d '\r\n' | tr -d ' ')
-      ERROR_MESSAGE=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'message')
+      STATUS=$(echo $DEPLOYMENT_GET_OUTPUT | jsonValue 'status' | tr -d '\r\n' | tr -d ' ')
+      ERROR_MESSAGE=$(echo $DEPLOYMENT_GET_OUTPUT | jsonValue 'message')
 
       # Deployment failed
       if [ "$STATUS" = 'Failed' ]; then
@@ -358,11 +358,11 @@ if [ 'true' = "$DEPLOYMENT_OVERVIEW" ]; then
       fi
 
       # Deployment Overview
-      IN_PROGRESS=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'InProgress' | tr -d '\r\n' | tr -d ' ')
-      PENDING=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'Pending' | tr -d '\r\n' | tr -d ' ')
-      SKIPPED=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'Skipped' | tr -d '\r\n' | tr -d ' ')
-      SUCCEEDED=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'Succeeded' | tr -d '\r\n' | tr -d ' ')
-      FAILED=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'Failed' | tr -d '\r\n' | tr -d ' ')
+      IN_PROGRESS=$(echo $DEPLOYMENT_GET_OUTPUT | jsonValue 'InProgress' | tr -d '\r\n' | tr -d ' ')
+      PENDING=$(echo $DEPLOYMENT_GET_OUTPUT | jsonValue 'Pending' | tr -d '\r\n' | tr -d ' ')
+      SKIPPED=$(echo $DEPLOYMENT_GET_OUTPUT | jsonValue 'Skipped' | tr -d '\r\n' | tr -d ' ')
+      SUCCEEDED=$(echo $DEPLOYMENT_GET_OUTPUT | jsonValue 'Succeeded' | tr -d '\r\n' | tr -d ' ')
+      FAILED=$(echo $DEPLOYMENT_GET_OUTPUT | jsonValue 'Failed' | tr -d '\r\n' | tr -d ' ')
       echo  "| In Progress: $IN_PROGRESS | Pending: $PENDING | Skipped: $SKIPPED | Succeeded: $SUCCEEDED | Failed: $FAILED |"
 
       # Deployment succeeded
