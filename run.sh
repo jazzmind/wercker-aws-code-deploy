@@ -50,12 +50,12 @@ jsonValue() {
 
 
 # Check variables
-if [ -n "$WERCKER_AWS_CODE_DEPLOY_KEY" ]; then
+if [ -z "$WERCKER_AWS_CODE_DEPLOY_KEY" ]; then
   error "Please set the 'key' variable"
   exit 1
 fi
 
-if [ -n "$WERCKER_AWS_CODE_DEPLOY_SECRET" ]; then
+if [ -z "$WERCKER_AWS_CODE_DEPLOY_SECRET" ]; then
   error "Please set the 'secret' variable"
   exit 1
 fi
