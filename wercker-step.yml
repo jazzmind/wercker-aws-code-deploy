@@ -1,5 +1,5 @@
 name: aws-code-deploy
-version: 0.0.19
+version: 0.0.20
 description: Deploy applications with AWS Code Deploy
 keywords:
   - aws
