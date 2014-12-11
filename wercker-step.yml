@@ -1,3 +1,74 @@
 name: aws-code-deploy
-version: 0.0.14
+version: 0.0.17
 description: Deploy applications with AWS Code Deploy
+keywords:
+  - aws
+  - code-deploy
+properties:
+  # Step 1: Configuring AWS
+  key:
+    type: string
+    required: true
+  secret:
+    type: string
+    required: true
+  region:
+    type: string
+    required: false
+
+  # Step 2: Defining application
+  application-name:
+    type: string
+    required: true
+  application-version:
+    type: string
+    required: false
+
+  # Step 3 : Defining Deployment Config
+  deployment-config-name:
+    type: string
+    required: false
+  minimum-healthy-hosts:
+    type: string
+    required: false
+
+  # Step 4 : Defining Deployment Group
+  deployment-group-name:
+    type: string
+    required: true
+  service-role-arn:
+    type: string
+    required: false
+  ec2-tag-filters:
+    type: string
+    required: false
+  auto-scaling-groups:
+    type: string
+    required: false
+
+  # Step 5 : Pushing to S3
+  s3-bucket:
+    type: string
+    required: true
+  s3-source:
+    type: string
+    required: false
+  s3-key:
+    type: string
+    required: false
+
+  # Step 6 : Registering Revision
+  revision:
+    type: string
+    required: false
+  revision-description:
+    type: string
+    required: false
+
+  # Step 7 : Creating Deployment
+  deployment-description:
+    type: string
+    required: false
+  deployment-overview:
+    type: boolean
+    required: false

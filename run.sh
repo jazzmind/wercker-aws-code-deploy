@@ -42,29 +42,24 @@ bold() { printf "${bold}%s${reset}\n" "$@"
 note() { printf "\n${underline}${bold}${blue}Note:${reset} ${blue}%s${reset}\n" "$@"
 }
 
-
-type_exists() {
-  if [ $(type -P $1) ]; then
-    return 0
-  fi
-  return 1
-}
-
 jsonValue() {
   key=$1
   num=$2
   awk -F"[,:}]" '{for(i=1;i<=NF;i++){if($i~/'$key'\042/){print $(i+1)}}}' | tr -d '"' | sed -n ${num}p
 }
 
-# Check AWS is installed
-if ! type_exists 'aws'; then
-  error 'AWS Cli is not installed on this box.'
-  note 'Please install AWS Cli : https://github.com/EdgecaseInc/wercker-step-install-aws-cli'
+
+# Check variables
+if [ -n "$WERCKER_AWS_CODE_DEPLOY_KEY" ]; then
+  error "Please set the 'key' variable"
   exit 1
 fi
 
+if [ -n "$WERCKER_AWS_CODE_DEPLOY_SECRET" ]; then
+  error "Please set the 'secret' variable"
+  exit 1
+fi
 
-# Check variables
 if [ -z "$WERCKER_AWS_CODE_DEPLOY_APPLICATION_NAME" ]; then
   error "Please set the 'application-name' variable"
   exit 1
@@ -80,6 +75,48 @@ if [ -z "$WERCKER_AWS_CODE_DEPLOY_S3_BUCKET" ]; then
   exit 1
 fi
 
+# ----- Install AWS Cli -----
+# see documentation : http://docs.aws.amazon.com/cli/latest/userguide/installing.html
+# ---------------------------
+set -e
+h1 "Installing AWS CLI"
+
+sudo apt-get install unzip -y 2>&1
+
+h2 'Downloading AWS CLI'
+wget https://s3.amazonaws.com/aws-cli/awscli-bundle.zip 2>&1 > /dev/null
+unzip awscli-bundle.zip 2>&1 > /dev/null
+success "Downloading AWS CLI succeeded"
+
+h2 "Installing AWS CLI"
+sudo ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws 2>&1 > /dev/null
+rm -rf awscli-bundle*
+success "Installing AWS CLI (`aws --version`) ID succeeded"
+
+set +e
+# ----- Configure -----
+# see documentation :
+#    http://docs.aws.amazon.com/cli/latest/reference/configure/index.html
+# ----------------------
+set -e
+
+h1 "Step 1: Configuring AWS"
+
+h2 "Configuring AWS Access Key ID"
+CONFIGURE_KEY_OUTPUT=$(aws configure set aws_access_key_id $WERCKER_AWS_CODE_DEPLOY_KEY 2>&1)
+success "Configuring AWS Access Key ID succeeded"
+
+h2 "Configuring AWS Access Key ID"
+CONFIGURE_SECRET_OUTPUT=$(aws configure set aws_secret_access_key $WERCKER_AWS_CODE_DEPLOY_SECRET 2>&1)
+success "Configuring AWS Secret Access Key succeeded"
+
+if [ -n "$WERCKER_AWS_CODE_DEPLOY_REGION" ]; then
+  h2 "Configuring AWS default region"
+  CONFIGURE_REGION_OUTPUT=$(aws configure set default.region $WERCKER_AWS_CODE_DEPLOY_REGION 2>&1)
+  success "Configuring AWS default region succeeded"
+fi
+
+set +e
 
 # ----- Application -----
 # see documentation :
@@ -91,7 +128,7 @@ APPLICATION_NAME="$WERCKER_AWS_CODE_DEPLOY_APPLICATION_NAME"
 APPLICATION_VERSION=${WERCKER_AWS_CODE_DEPLOY_APPLICATION_VERSION:-${WERCKER_GIT_COMMIT:0:7}}
 
 # Check application exists
-h1 "Step 1: Defining application"
+h1 "Step 2: Defining application"
 h2 "Checking application '$APPLICATION_NAME' exists"
 
 APPLICATION_EXISTS="aws deploy get-application --application-name $APPLICATION_NAME"
@@ -126,7 +163,7 @@ DEPLOYMENT_CONFIG_NAME=${WERCKER_AWS_CODE_DEPLOY_DEPLOYMENT_CONFIG_NAME:-CodeDep
 MINIMUM_HEALTHY_HOSTS=${WERCKER_AWS_CODE_DEPLOY_MINIMUM_HEALTHY_HOSTS:-type=FLEET_PERCENT,value=75}
 
 # Ckeck deployment config exists
-h1 "Step 2: Defining deployment config"
+h1 "Step 3: Defining deployment config"
 h2 "Checking deployment config '$DEPLOYMENT_CONFIG_NAME' exists"
 
 DEPLOYMENT_CONFIG_EXISTS="aws deploy get-deployment-config --deployment-config-name $DEPLOYMENT_CONFIG_NAME"
@@ -163,7 +200,7 @@ EC2_TAG_FILTERS="$WERCKER_AWS_CODE_DEPLOY_EC2_TAG_FILTERS"
 SERVICE_ROLE_ARN="$WERCKER_AWS_CODE_DEPLOY_SERVICE_ROLE_ARN"
 
 # Ckeck deployment group exists
-h1 "Step 3: Defining deployment group"
+h1 "Step 4: Defining deployment group"
 h2 "Checking deployment group '$DEPLOYMENT_GROUP' exists for application '$APPLICATION_NAME'"
 
 DEPLOYMENT_GROUP_EXISTS="aws deploy get-deployment-group --application-name $APPLICATION_NAME --deployment-group-name $DEPLOYMENT_GROUP"
@@ -217,7 +254,7 @@ if [ -n "$S3_KEY" ]; then
 fi
 S3_LOCATION="$S3_LOCATION/$REVISION"
 
-h1 "Step 4: Pushing to S3"
+h1 "Step 5: Pushing to S3"
 PUSH_S3="aws deploy push --application-name $APPLICATION_NAME --s3-location $S3_LOCATION --source $S3_SOURCE"
 if [ -n "$REVISION_DESCRIPTION" ]; then
   PUSH_S3="$PUSH_S3 --description '$REVISION_DESCRIPTION'"
@@ -237,7 +274,7 @@ success "Pushing revision '$REVISION' to S3 succeeded"
 # ----- Register revision -----
 # see documentation : http://docs.aws.amazon.com/cli/latest/reference/deploy/register-application-revision.html
 # ----------------------
-h1 "Step 5: Registering revision"
+h1 "Step 6: Registering revision"
 
 # Build S3 Location
 BUNDLE_TYPE=${REVISION##*.}
@@ -272,7 +309,7 @@ success "Registering revision '$REVISION' succeeded"
 DEPLOYMENT_DESCRIPTION="$WERCKER_AWS_CODE_DEPLOY_DEPLOYMENT_DESCRIPTION"
 DEPLOYMENT_OVERVIEW=${WERCKER_AWS_CODE_DEPLOY_DEPLOYMENT_OVERVIEW:-true}
 
-h1 "Step 6: Creating deployment"
+h1 "Step 7: Creating deployment"
 DEPLOYMENT="aws deploy create-deployment --application-name $APPLICATION_NAME --deployment-config-name $DEPLOYMENT_CONFIG_NAME --deployment-group-name $DEPLOYMENT_GROUP --s3-location $S3_LOCATION"
 
 if [ -n "$DEPLOYMENT_DESCRIPTION" ]; then
