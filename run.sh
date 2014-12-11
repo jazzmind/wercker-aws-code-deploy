@@ -81,16 +81,10 @@ fi
 set -e
 h1 "Installing AWS CLI"
 
-sudo apt-get install unzip -y 2>&1
+INSTALL_AWSCLI="sudo pip install awscli"
+info "$INSTALL_AWSCLI"
+INSTALL_AWSCLI_OUTPUT=$($INSTALL_AWSCLI 2>&1)
 
-h2 'Downloading AWS CLI'
-wget https://s3.amazonaws.com/aws-cli/awscli-bundle.zip 2>&1 > /dev/null
-unzip awscli-bundle.zip 2>&1 > /dev/null
-success "Downloading AWS CLI succeeded"
-
-h2 "Installing AWS CLI"
-sudo ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws 2>&1 > /dev/null
-rm -rf awscli-bundle*
 success "Installing AWS CLI (`aws --version`) ID succeeded"
 
 set +e
