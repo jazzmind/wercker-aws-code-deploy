@@ -94,7 +94,7 @@ if ! type_exists 'aws'; then
   INSTALL_AWSCLI="sudo pip install awscli"
   info "$INSTALL_AWSCLI"
   INSTALL_AWSCLI_OUTPUT=$($INSTALL_AWSCLI 2>&1)
-  success "Installing AWS CLI succeeded"
+  success "Installing AWS CLI (`aws --version`) succeeded"
   set +e
 fi
 
