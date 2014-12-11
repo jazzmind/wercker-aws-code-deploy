@@ -42,6 +42,14 @@ bold() { printf "${bold}%s${reset}\n" "$@"
 note() { printf "\n${underline}${bold}${blue}Note:${reset} ${blue}%s${reset}\n" "$@"
 }
 
+
+type_exists() {
+  if [ $(type -P $1) ]; then
+    return 0
+  fi
+  return 1
+}
+
 jsonValue() {
   key=$1
   num=$2
@@ -78,16 +86,18 @@ fi
 # ----- Install AWS Cli -----
 # see documentation : http://docs.aws.amazon.com/cli/latest/userguide/installing.html
 # ---------------------------
-set -e
-h1 "Installing AWS CLI"
 
-INSTALL_AWSCLI="sudo pip install awscli"
-info "$INSTALL_AWSCLI"
-INSTALL_AWSCLI_OUTPUT=$($INSTALL_AWSCLI 2>&1)
+# Check AWS is installed
+if ! type_exists 'aws'; then
+  set -e
+  h1 "Installing AWS CLI"
+  INSTALL_AWSCLI="sudo pip install awscli"
+  info "$INSTALL_AWSCLI"
+  INSTALL_AWSCLI_OUTPUT=$($INSTALL_AWSCLI 2>&1)
+  success "Installing AWS CLI succeeded"
+  set +e
+fi
 
-success "Installing AWS CLI succeeded"
-
-set +e
 # ----- Configure -----
 # see documentation :
 #    http://docs.aws.amazon.com/cli/latest/reference/configure/index.html
@@ -100,7 +110,7 @@ h2 "Configuring AWS Access Key ID"
 CONFIGURE_KEY_OUTPUT=$(aws configure set aws_access_key_id $WERCKER_AWS_CODE_DEPLOY_KEY 2>&1)
 success "Configuring AWS Access Key ID succeeded"
 
-h2 "Configuring AWS Access Key ID"
+h2 "Configuring AWS Secret Access Key"
 CONFIGURE_SECRET_OUTPUT=$(aws configure set aws_secret_access_key $WERCKER_AWS_CODE_DEPLOY_SECRET 2>&1)
 success "Configuring AWS Secret Access Key succeeded"
 
@@ -129,17 +139,16 @@ APPLICATION_EXISTS="aws deploy get-application --application-name $APPLICATION_N
 info "$APPLICATION_EXISTS"
 APPLICATION_EXISTS_OUTPUT=$($APPLICATION_EXISTS 2>&1)
 
-if [[ $? -ne 0 ]];then
+if [ $? -ne 0 ]; then
   warn "$APPLICATION_EXISTS_OUTPUT"
   h2 "Creating application '$APPLICATION_NAME' :"
-
 
   # Create application
   APPLICATION_CREATE="aws deploy create-application --application-name $APPLICATION_NAME"
   info "$APPLICATION_CREATE"
   APPLICATION_CREATE_OUTPUT=$($APPLICATION_CREATE 2>&1)
 
-  if [[ $? -ne 0 ]];then
+  if [ $? -ne 0 ]; then
     warn "$APPLICATION_CREATE_OUTPUT"
     error "Creating application '$APPLICATION_NAME' failed"
     exit 1
@@ -164,7 +173,7 @@ DEPLOYMENT_CONFIG_EXISTS="aws deploy get-deployment-config --deployment-config-n
 info "$DEPLOYMENT_CONFIG_EXISTS"
 DEPLOYMENT_CONFIG_EXISTS_OUTPUT=$($DEPLOYMENT_CONFIG_EXISTS 2>&1)
 
-if [[ $? -ne 0 ]];then
+if [ $? -ne 0 ]; then
   warn "$DEPLOYMENT_CONFIG_EXISTS_OUTPUT"
   h2 "Creating deployment config '$DEPLOYMENT_CONFIG_NAME'"
 
@@ -173,7 +182,7 @@ if [[ $? -ne 0 ]];then
   info "$DEPLOYMENT_CONFIG_CREATE"
   DEPLOYMENT_CONFIG_CREATE_OUTPUT=$($DEPLOYMENT_CONFIG_CREATE 2>&1)
 
-  if [[ $? -ne 0 ]];then
+  if [ $? -ne 0 ]; then
     warn "$DEPLOYMENT_CONFIG_CREATE_OUTPUT"
     error "Creating deployment config '$DEPLOYMENT_CONFIG_NAME' failed"
     exit 1
@@ -201,7 +210,7 @@ DEPLOYMENT_GROUP_EXISTS="aws deploy get-deployment-group --application-name $APP
 info "$DEPLOYMENT_GROUP_EXISTS"
 DEPLOYMENT_GROUP_EXISTS_OUTPUT=$($DEPLOYMENT_GROUP_EXISTS 2>&1)
 
-if [[ $? -ne 0 ]];then
+if [ $? -ne 0 ]; then
   warn "$DEPLOYMENT_GROUP_EXISTS_OUTPUT"
   h2 "Creating deployment group '$DEPLOYMENT_GROUP' for application '$APPLICATION_NAME'"
 
@@ -220,7 +229,7 @@ if [[ $? -ne 0 ]];then
   info "$DEPLOYMENT_GROUP_CREATE"
   DEPLOYMENT_GROUP_CREATE_OUTPUT=$($DEPLOYMENT_GROUP_CREATE 2>&1)
 
-  if [[ $? -ne 0 ]];then
+  if [ $? -ne 0 ]; then
     warn "$DEPLOYMENT_GROUP_CREATE_OUTPUT"
     error "Creating deployment group '$DEPLOYMENT_GROUP' for application '$APPLICATION_NAME' failed"
     exit 1
@@ -257,7 +266,7 @@ fi
 info "$PUSH_S3"
 PUSH_S3_OUTPUT=$($PUSH_S3 2>&1)
 
-if [[ $? -ne 0 ]];then
+if [ $? -ne 0 ]; then
   warn "$PUSH_S3_OUTPUT"
   error "Pushing revision '$REVISION' to S3 failed"
   exit 1
@@ -289,7 +298,7 @@ fi
 info "$REGISTER_REVISION"
 REGISTER_REVISION_OUTPUT=$($REGISTER_REVISION 2>&1)
 
-if [[ $? -ne 0 ]];then
+if [ $? -ne 0 ]; then
   warn "$REGISTER_REVISION_OUTPUT"
   error "Registering revision '$REVISION' failed"
   exit 1
@@ -312,7 +321,7 @@ fi
 info "$DEPLOYMENT"
 DEPLOYMENT_OUTPUT=$($DEPLOYMENT 2>&1)
 
-if [[ $? -ne 0 ]];then
+if [ $? -ne 0 ]; then
   warn "$DEPLOYMENT_OUTPUT"
   error "Deployment of application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' failed"
   exit 1
@@ -332,7 +341,7 @@ if [ 'true' = "$DEPLOYMENT_OVERVIEW" ]; then
     do
       sleep 5
       DEPLOYMENT_GET_OUTPUT=$($DEPLOYMENT_GET 2>&1 > /tmp/$DEPLOYMENT_ID)
-      if [[ $? -ne 0 ]];then
+      if [ $? -ne 0 ]; then
         warn "$DEPLOYMENT_OUTPUT"
         error "Deployment of application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' failed"
         exit 1
