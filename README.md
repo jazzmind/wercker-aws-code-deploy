@@ -7,24 +7,28 @@ This wercker step allows to deploy applications with [AWS Code Deploy](http://do
 
 Please read the [AWS Code Deploy](http://docs.aws.amazon.com/codedeploy/latest/userguide/welcome.html) documentation and [API](http://docs.aws.amazon.com/cli/latest/reference/deploy/index.html) before using this step.
 
+
+The step install the [AWS Cli](http://docs.aws.amazon.com/cli/latest/userguide/installing.html) through pip, if the CLI is not already installed. 
+
+
 ## AWS Code Deploy workflow
 
-To deploy an application with AWS Code Deploy, the Wercker step follow this steps : 
+To deploy an application with AWS Code Deploy, the Wercker step follow this steps :
 
 #### Step 1 : [Configuring AWS](http://docs.aws.amazon.com/cli/latest/reference/configure/index.html)
 
-This initial step consists on configuring AWS. 
- 
+This initial step consists on configuring AWS.
+
 The following configuration allows to setup this step :
 
 * `key` (required): AWS Access Key ID
 * `secret` (required): AWS Secret Access Key
 * `region` (optional): Default region name
 
-#### Step 2 : [Defining Application](http://docs.aws.amazon.com/cli/latest/reference/deploy/create-application.html) 
+#### Step 2 : [Defining Application](http://docs.aws.amazon.com/cli/latest/reference/deploy/create-application.html)
 
 This second step consists on defining the application. If the application does not exists this step create the application in Code Deploy.
- 
+
 The following configuration allows to setup this step :
 
 * `application-name` (required): Name of the application to deploy
@@ -48,7 +52,7 @@ The following configuration allows to setup this step :
 * `deployment-group-name` (required): Deployment group name
 * `service-role-arn` (optional): Service role arn giving permissions to use Code Deploy when creating a deployment group
 * `ec2-tag-filters` (optional): EC2 tags to filter on when creating a deployment group
-* `auto-scaling-groups` (optional): Auto Scaling groups when creating a deployment group 
+* `auto-scaling-groups` (optional): Auto Scaling groups when creating a deployment group
 
 #### Step 5 : [Pushing to S3](http://docs.aws.amazon.com/cli/latest/reference/deploy/push.html)
 
@@ -60,7 +64,7 @@ The following configuration allows to setup this step :
 * `s3-source` (optional): S3 Source. By default : _._
 * `s3-key` (optional): S3 Key. By default: _{application-name}_
 
-#### Step 6 : [Registering Revision](http://docs.aws.amazon.com/cli/latest/reference/deploy/register-application-revision.html) 
+#### Step 6 : [Registering Revision](http://docs.aws.amazon.com/cli/latest/reference/deploy/register-application-revision.html)
 
 This step consists to register the revision in Code Deploy.
 
@@ -69,7 +73,7 @@ The following configuration allows to setup this step :
 * `revision` (optional): Revision of the application to deploy. By default: _{application-name}-{application-version}.zip_
 * `revision-description` (optional): Description of the revision of the application to deploy
 
-#### Step 7 : [Creating Deployment](http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment.html) 
+#### Step 7 : [Creating Deployment](http://docs.aws.amazon.com/cli/latest/reference/deploy/create-deployment.html)
 
 This final step consists to create the deployment in Code Deploy.
 
