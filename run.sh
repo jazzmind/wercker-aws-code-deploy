@@ -88,7 +88,7 @@ fi
 # ---------------------------
 
 # Check AWS is installed
-if ! type_exists 'awscli'; then
+if ! type_exists 'aws'; then
   h1 "Installing AWS CLI"
   INSTALL_AWSCLI="sudo pip install awscli"
   info "$INSTALL_AWSCLI"
