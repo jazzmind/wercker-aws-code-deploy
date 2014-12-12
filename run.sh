@@ -89,14 +89,15 @@ fi
 
 # Check AWS is installed
 if ! type_exists 'awscli'; then
-  set -e
   h1 "Installing AWS CLI"
   INSTALL_AWSCLI="sudo pip install awscli"
   info "$INSTALL_AWSCLI"
   INSTALL_AWSCLI_OUTPUT=$($INSTALL_AWSCLI 2>&1)
-  info "$INSTALL_AWSCLI_OUTPUT"
+  if [ $? -ne 0 ]; then
+    warn "$INSTALL_AWSCLI_OUTPUT"
+    exit 1
+  fi
   success "Installing AWS CLI (`aws --version`) succeeded"
-  set +e
 fi
 
 # ----- Configure -----
