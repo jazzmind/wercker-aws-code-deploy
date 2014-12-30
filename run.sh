@@ -358,6 +358,11 @@ if [ 'true' = "$DEPLOYMENT_OVERVIEW" ]; then
           error "Deployment of application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' failed: $ERROR_MESSAGE"
           exit 1
       fi
+      # Deployment succeeded
+      if [ "$STATUS" = 'Succeeded' ]; then
+         success "Deployment of application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' succeeded"
+         break
+      fi
 
       # Deployment Overview
       IN_PROGRESS=$(echo $DEPLOYMENT_GET_OUTPUT | jsonValue 'InProgress' | tr -d '\r\n' | tr -d ' ')
@@ -366,13 +371,6 @@ if [ 'true' = "$DEPLOYMENT_OVERVIEW" ]; then
       SUCCEEDED=$(echo $DEPLOYMENT_GET_OUTPUT | jsonValue 'Succeeded' | tr -d '\r\n' | tr -d ' ')
       FAILED=$(echo $DEPLOYMENT_GET_OUTPUT | jsonValue 'Failed' | tr -d '\r\n' | tr -d ' ')
       echo  "| In Progress: $IN_PROGRESS | Pending: $PENDING | Skipped: $SKIPPED | Succeeded: $SUCCEEDED | Failed: $FAILED |"
-
-      # Deployment succeeded
-      if [ "$STATUS" = 'Succeeded' ]; then
-         success "Deployment of application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' succeeded"
-         break
-      fi
-
     done
 else
   info "Deployment of application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' in progress"
