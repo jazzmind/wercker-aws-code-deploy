@@ -342,35 +342,39 @@ if [ 'true' = "$DEPLOYMENT_OVERVIEW" ]; then
   while :
     do
       sleep 5
-      DEPLOYMENT_GET_OUTPUT=$($DEPLOYMENT_GET 2>&1)
+      DEPLOYMENT_GET_OUTPUT=$($DEPLOYMENT_GET 2>&1 > /tmp/$DEPLOYMENT_ID)
       if [ $? -ne 0 ]; then
+        printf "\n"
         warn "$DEPLOYMENT_OUTPUT"
         error "Deployment of application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' failed"
         exit 1
       fi
 
       # Deployment Status
-      STATUS=$(echo $DEPLOYMENT_GET_OUTPUT | jsonValue 'status' | tr -d '\r\n' | tr -d ' ')
-      ERROR_MESSAGE=$(echo $DEPLOYMENT_GET_OUTPUT | jsonValue 'message')
+      STATUS=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'status' | tr -d '\r\n' | tr -d ' ')
+      ERROR_MESSAGE=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'message')
 
       # Deployment failed
       if [ "$STATUS" = 'Failed' ]; then
+          printf "\n"
           error "Deployment of application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' failed: $ERROR_MESSAGE"
           exit 1
       fi
+
+      # Deployment Overview
+      IN_PROGRESS=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'InProgress' | tr -d '\r\n' | tr -d ' ')
+      PENDING=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'Pending' | tr -d '\r\n' | tr -d ' ')
+      SKIPPED=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'Skipped' | tr -d '\r\n' | tr -d ' ')
+      SUCCEEDED=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'Succeeded' | tr -d '\r\n' | tr -d ' ')
+      FAILED=$(cat /tmp/$DEPLOYMENT_ID | jsonValue 'Failed' | tr -d '\r\n' | tr -d ' ')
+      printf "\r| In Progress: $IN_PROGRESS | Pending: $PENDING | Skipped: $SKIPPED | Succeeded: $SUCCEEDED | Failed: $FAILED |"
+
       # Deployment succeeded
       if [ "$STATUS" = 'Succeeded' ]; then
+         printf "\n"
          success "Deployment of application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' succeeded"
          break
       fi
-
-      # Deployment Overview
-      IN_PROGRESS=$(echo $DEPLOYMENT_GET_OUTPUT | jsonValue 'InProgress' | tr -d '\r\n' | tr -d ' ')
-      PENDING=$(echo $DEPLOYMENT_GET_OUTPUT | jsonValue 'Pending' | tr -d '\r\n' | tr -d ' ')
-      SKIPPED=$(echo $DEPLOYMENT_GET_OUTPUT | jsonValue 'Skipped' | tr -d '\r\n' | tr -d ' ')
-      SUCCEEDED=$(echo $DEPLOYMENT_GET_OUTPUT | jsonValue 'Succeeded' | tr -d '\r\n' | tr -d ' ')
-      FAILED=$(echo $DEPLOYMENT_GET_OUTPUT | jsonValue 'Failed' | tr -d '\r\n' | tr -d ' ')
-      echo  "| In Progress: $IN_PROGRESS | Pending: $PENDING | Skipped: $SKIPPED | Succeeded: $SUCCEEDED | Failed: $FAILED |"
     done
 else
   info "Deployment of application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' in progress"
