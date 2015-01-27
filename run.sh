@@ -241,7 +241,7 @@ else
   success "Deployment group '$DEPLOYMENT_GROUP' already exists for application '$APPLICATION_NAME'"
 fi
 
-
+DEPLOY_CMD = "aws deploy create-deployment --github-location repository='$GIT_REPO',commitId='$COMMIT_ID' --application-name '$APPLICATION_NAME' --deployment-group $DEPLOYMENT_GROUP"
 # ----- Push a revision to S3 -----
 # see documentation http://docs.aws.amazon.com/cli/latest/reference/deploy/push.html
 # ----------------------
