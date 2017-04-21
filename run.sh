@@ -345,7 +345,7 @@ if [ 'true' = "$DEPLOYMENT_OVERVIEW" ]; then
       DEPLOYMENT_GET_OUTPUT=$($DEPLOYMENT_GET 2>&1 > /tmp/$DEPLOYMENT_ID)
       if [ $? -ne 0 ]; then
         printf "\n"
-        warn "$DEPLOYMENT_OUTPUT"
+        warn "$DEPLOYMENT_GET_OUTPUT"
         error "Deployment of application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' failed"
         exit 1
       fi
