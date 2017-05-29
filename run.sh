@@ -339,13 +339,21 @@ if [ 'true' = "$DEPLOYMENT_OVERVIEW" ]; then
 
   h2  "Deploying application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP'"
 
+  FAILURE_COUNTER=0
   while :
     do
       sleep 5
       DEPLOYMENT_GET_OUTPUT=$($DEPLOYMENT_GET 2>&1 > /tmp/$DEPLOYMENT_ID)
       if [ $? -ne 0 ]; then
+        warn "DEPLOYMENT_GET failed, will keep retrying"
+        FAILURE_COUNTER=$((FAILURE_COUNTER + 1))
         printf "\n"
         warn "$DEPLOYMENT_GET_OUTPUT"
+        continue
+      fi
+
+      if [ $FAILURE_COUNTER -eq 10 ]; then
+        warn "Deployment fetch failed 10 times. Giving up"
         error "Deployment of application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' failed"
         exit 1
       fi
