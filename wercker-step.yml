@@ -15,6 +15,10 @@ properties:
   region:
     type: string
     required: false
+  skip:
+    type: string
+    required: false
+    default: false
 
   # Step 2: Defining application
   application-name:
