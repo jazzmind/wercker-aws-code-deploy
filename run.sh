@@ -83,6 +83,11 @@ if [ -z "$WERCKER_AWS_CODE_DEPLOY_S3_BUCKET" ]; then
   exit 1
 fi
 
+if [ "$WERCKER_AWS_CODE_DEPLOY_SKIP" == "true" ]; then
+  info "Deployment of application '$APPLICATION_NAME' on deployment group '$DEPLOYMENT_GROUP' skipped"
+  exit 0
+fi
+
 # ----- Install AWS Cli -----
 # see documentation http://docs.aws.amazon.com/cli/latest/userguide/installing.html
 # ---------------------------

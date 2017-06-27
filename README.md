@@ -8,7 +8,7 @@ This wercker step allows to deploy applications with [AWS Code Deploy](http://do
 Please read the [AWS Code Deploy](http://docs.aws.amazon.com/codedeploy/latest/userguide/welcome.html) documentation and [API](http://docs.aws.amazon.com/cli/latest/reference/deploy/index.html) before using this step.
 
 
-The step install the [AWS Cli](http://docs.aws.amazon.com/cli/latest/userguide/installing.html) through pip, if the CLI is not already installed. 
+The step install the [AWS Cli](http://docs.aws.amazon.com/cli/latest/userguide/installing.html) through pip, if the CLI is not already installed.
 
 
 ## AWS Code Deploy workflow
@@ -24,6 +24,7 @@ The following configuration allows to setup this step :
 * `key` (required): AWS Access Key ID
 * `secret` (required): AWS Secret Access Key
 * `region` (optional): Default region name
+* `skip` (optional, default `false`): Skip deployment on a flag value
 
 #### Step 2 : [Defining Application](http://docs.aws.amazon.com/cli/latest/reference/deploy/create-application.html)
 
@@ -98,4 +99,5 @@ deploy:
        service-role-arn: arn:aws:iam::89862646$091:role/CodeDeploy
        ec2-tag-filters: Key=app,Value=hello,Type=KEY_AND_VALUE Key=environment,Value=development,Type=KEY_AND_VALUE
        s3-bucket: apps.mycompany.com
+       skip: false
 ```
